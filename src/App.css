@@ -148,6 +148,14 @@ body {
   padding: 40px 20px;
 }
 
+.spot-price h2 {
+  color: var(--text-secondary);
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 20px;
+}
+
 .spot-price-display {
   margin-bottom: 15px;
 }
