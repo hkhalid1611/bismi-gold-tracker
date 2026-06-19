@@ -123,7 +123,8 @@ export default function App() {
     // Calculate the actual value of the gold based on purity and spot price
     const actualGoldValue = scrapGrams * spotPrice.gram * purity;
     
-    // Profit/loss is the difference between offer and actual gold value
+    // Profit/loss: if offer is ABOVE the actual gold value, it's a profit
+    // if offer is BELOW the actual gold value, it's a loss
     const profit = totalOfferPrice - actualGoldValue;
     
     return {
