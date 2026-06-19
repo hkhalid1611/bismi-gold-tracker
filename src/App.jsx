@@ -188,14 +188,7 @@ export default function App() {
               {priceUnit === 'gram' ? 'per gram' : 'per ounce'}
             </div>
           </div>
-          <div className={`price-change-indicator ${priceChange > 0 ? 'up' : priceChange < 0 ? 'down' : 'neutral'}`}>
-            <span className="change-arrow">
-              {priceChange > 0 ? '↑' : priceChange < 0 ? '↓' : '—'}
-            </span>
-            <span className="change-percent">
-              {Math.abs(priceChange).toFixed(2)}%
-            </span>
-          </div>
+
           {lastUpdate && (
             <div className="last-update">
               Updated: {lastUpdate.toLocaleTimeString()}
