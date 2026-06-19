@@ -230,14 +230,16 @@ export default function App() {
     const maxOfferPerGram = spotPrice.gram * (caratPercentages[scrapKarat] / 100);
     const totalOfferPrice = scrapGrams * scrapOfferPerGram;
     const maxTotalPrice = scrapGrams * maxOfferPerGram;
-    const profit = totalOfferPrice - maxTotalPrice;
+    // Profit if offer is LESS than max (you're offering less than allowed)
+    // Loss if offer is MORE than max (you're overpaying)
+    const profit = maxTotalPrice - totalOfferPrice;
     
     return {
       maxOfferPerGram,
       totalOfferPrice,
       maxTotalPrice,
       profit,
-      isProfit: profit > 0
+      isProfit: profit >= 0
     };
   };
 
@@ -377,10 +379,12 @@ export default function App() {
             {Object.entries(caratPercentages).map(([karat, percentage]) => {
               const maxOffer = spotPrice ? spotPrice.gram * (percentage / 100) : 0;
               return (
-                <div key={karat} className="scrap-price-item">
-                  <div className="scrap-karat">{karat} Carat</div>
-                  <div className="scrap-percentage">{percentage}% of spot</div>
-                  <div className="scrap-max-offer">Max offer: £{maxOffer.toFixed(2)}/g</div>
+                <div key={karat} className="scrap-price-row">
+                  <div className="scrap-info">
+                    <div className="scrap-karat">{karat} Carat</div>
+                    <div className="scrap-percentage">{percentage}% of spot</div>
+                  </div>
+                  <div className="scrap-max-offer">£{maxOffer.toFixed(2)}/g</div>
                 </div>
               );
             })}
@@ -558,6 +562,32 @@ export default function App() {
                           const x = 50 + (i / (chartData.length - 1 || 1)) * 700;
                           const y = 250 - ((d.price - minPrice) / range) * 200;
                           return <circle key={`point-${i}`} cx={x} cy={y} r="3" fill="#d4af37" />;
+                        })}
+                        
+                        {/* Horizontal axis labels (dates) */}
+                        {chartData.map((d, i) => {
+                          if (i % Math.max(1, Math.floor(chartData.length / 6)) === 0 || i === chartData.length - 1) {
+                            const x = 50 + (i / (chartData.length - 1 || 1)) * 700;
+                            return (
+                              <g key={`date-${i}`}>
+                                <line x1={x} y1="250" x2={x} y2="260" stroke="#666" strokeWidth="1" />
+                                <text x={x} y="275" textAnchor="middle" fontSize="11" fill="#999" fontFamily="Arial">{d.date}</text>
+                              </g>
+                            );
+                          }
+                          return null;
+                        })}
+                        
+                        {/* Vertical axis labels (prices) */}
+                        {[0, 1, 2, 3, 4].map(i => {
+                          const price = minPrice + (range / 4) * i;
+                          const y = 250 - (i * 50);
+                          return (
+                            <g key={`price-${i}`}>
+                              <line x1="45" y1={y} x2="50" y2={y} stroke="#666" strokeWidth="1" />
+                              <text x="40" y={y + 4} textAnchor="end" fontSize="11" fill="#999" fontFamily="Arial">£{price.toFixed(0)}</text>
+                            </g>
+                          );
                         })}
                       </>
                     );

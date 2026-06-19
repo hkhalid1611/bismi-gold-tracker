@@ -437,6 +437,24 @@ body {
   color: var(--text-primary);
 }
 
+.scrap-price-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 15px;
+  align-items: center;
+  background-color: var(--tertiary-bg);
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  margin-bottom: 10px;
+}
+
+.scrap-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .scrap-price-item {
   background-color: var(--tertiary-bg);
   padding: 12px;
@@ -464,10 +482,17 @@ body {
 }
 
 .scrap-max-offer {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.scrap-karat {
   font-size: 13px;
   font-weight: 600;
   color: var(--text-primary);
-  text-align: right;
 }
 
 /* Price Indicators */
