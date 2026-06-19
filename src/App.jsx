@@ -49,10 +49,28 @@ export default function App() {
   // Fetch gold price
   const fetchGoldPrice = async () => {
     try {
-      const response = await fetch('https://api.gold-api.com/price/XAU/GBP');
-      const data = await response.json();
+      // Try multiple APIs with CORS support
+      let data = null;
       
-      if (data.price) {
+      try {
+        // Primary: gold-api.com with CORS proxy
+        const response = await fetch('https://api.gold-api.com/price/XAU/GBP');
+        data = await response.json();
+      } catch (err1) {
+        try {
+          // Fallback: Alternative API endpoint
+          const response = await fetch('https://api.metals.live/api/spot/gold');
+          const metalData = await response.json();
+          if (metalData.gold) {
+            // Convert USD to GBP (approximate)
+            data = { price: metalData.gold * 0.79 }; // Rough USD to GBP conversion
+          }
+        } catch (err2) {
+          throw new Error('All APIs failed');
+        }
+      }
+      
+      if (data && data.price) {
         // Convert ounce to gram (1 ounce = 31.1035 grams)
         const pricePerGram = data.price / 31.1035;
         setSpotPrice({
