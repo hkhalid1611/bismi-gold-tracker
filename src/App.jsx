@@ -120,20 +120,21 @@ export default function App() {
     const maxOfferPerGram = spotPrice.gram * (percentage / 100);
     const totalOfferPrice = scrapGrams * scrapOfferPerGram;
     
-    // Calculate the actual value of the gold based on purity and spot price
-    const actualGoldValue = scrapGrams * spotPrice.gram * purity;
+    // Calculate max total offer allowed for this amount of gold
+    const maxTotalOffer = scrapGrams * maxOfferPerGram;
     
-    // Profit/loss: if offer is ABOVE the actual gold value, it's a profit
-    // if offer is BELOW the actual gold value, it's a loss
-    const profit = totalOfferPrice - actualGoldValue;
+    // Profit/loss: compare your offer against the max offer allowed
+    // If your offer is LESS than max = PROFIT (you're offering less, so you keep more)
+    // If your offer is MORE than max = LOSS (you're overpaying)
+    const profit = maxTotalOffer - totalOfferPrice;
     
     return {
       percentage,
       maxOfferPerGram,
       totalOfferPrice,
-      actualGoldValue,
+      maxTotalOffer,
       profit,
-      isLoss: profit < 0
+      isLoss: totalOfferPrice > maxOfferPerGram * scrapGrams
     };
   };
 
