@@ -725,3 +725,135 @@ body {
     text-align: left;
   }
 }
+
+
+/* Price Trends Chart */
+.price-trends {
+  margin-top: 20px;
+}
+
+.chart-period-selector {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.period-btn {
+  padding: 8px 16px;
+  background-color: var(--tertiary-bg);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.period-btn:hover {
+  background-color: var(--secondary-bg);
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
+.period-btn.active {
+  background-color: var(--accent-gold);
+  color: var(--primary-bg);
+  border-color: var(--accent-gold);
+}
+
+.chart-container {
+  background-color: var(--tertiary-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 20px;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-display {
+  width: 100%;
+}
+
+.chart-svg {
+  width: 100%;
+  height: auto;
+  min-height: 300px;
+}
+
+.chart-info {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid var(--border-color);
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  text-align: center;
+}
+
+.info-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent-gold);
+}
+
+.chart-placeholder {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 40px 20px;
+}
+
+.chart-placeholder p {
+  margin: 10px 0;
+}
+
+.chart-note {
+  font-size: 12px;
+  margin-top: 10px;
+}
+
+.chart-note a {
+  color: var(--accent-gold);
+  text-decoration: none;
+}
+
+.chart-note a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive Chart */
+@media (max-width: 768px) {
+  .chart-period-selector {
+    justify-content: center;
+  }
+
+  .period-btn {
+    font-size: 11px;
+    padding: 6px 12px;
+  }
+
+  .chart-info {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-container {
+    padding: 15px;
+    min-height: 350px;
+  }
+}

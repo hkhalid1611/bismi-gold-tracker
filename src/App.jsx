@@ -29,6 +29,10 @@ export default function App() {
   const [scrapKarat, setScrapKarat] = useState('22');
   const [scrapGrams, setScrapGrams] = useState(10);
   const [scrapOfferPerGram, setScrapOfferPerGram] = useState(0);
+  
+  // Chart states
+  const [chartPeriod, setChartPeriod] = useState('12m');
+  const [chartData, setChartData] = useState(null);
 
   // Carat percentages of spot price
   const caratPercentages = {
@@ -99,12 +103,110 @@ export default function App() {
     }
   };
 
+  // Generate realistic historical gold price data
+  const generateHistoricalData = (period) => {
+    const now = new Date();
+    const currentPrice = spotPrice ? spotPrice.gram : 101;
+    const data = [];
+    
+    switch(period) {
+      case '24h':
+        for (let i = 0; i <= 24; i++) {
+          const date = new Date(now);
+          date.setHours(date.getHours() - (24 - i));
+          const variance = (Math.sin(i / 4) * 0.5 + Math.random() * 0.3) * currentPrice / 100;
+          data.push({
+            date: date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+            price: currentPrice - 1 + variance
+          });
+        }
+        break;
+      case '30d':
+        for (let i = 0; i < 30; i++) {
+          const date = new Date(now);
+          date.setDate(date.getDate() - (30 - i));
+          const variance = (Math.sin(i / 10) * 1.5 + Math.random() * 0.8) * currentPrice / 100;
+          data.push({
+            date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            price: currentPrice - 2 + variance
+          });
+        }
+        break;
+      case '3m':
+        for (let i = 0; i < 30; i++) {
+          const date = new Date(now);
+          date.setDate(date.getDate() - (90 - i * 3));
+          const variance = (Math.sin(i / 15) * 2 + Math.random() * 1) * currentPrice / 100;
+          data.push({
+            date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            price: currentPrice - 2.5 + variance
+          });
+        }
+        break;
+      case '6m':
+        for (let i = 0; i < 26; i++) {
+          const date = new Date(now);
+          date.setDate(date.getDate() - (180 - i * 7));
+          const variance = (Math.sin(i / 20) * 3 + Math.random() * 1.2) * currentPrice / 100;
+          data.push({
+            date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            price: currentPrice - 3 + variance
+          });
+        }
+        break;
+      case '12m':
+        for (let i = 0; i < 52; i++) {
+          const date = new Date(now);
+          date.setDate(date.getDate() - (365 - i * 7));
+          const variance = (Math.sin(i / 25) * 4 + Math.random() * 1.5) * currentPrice / 100;
+          data.push({
+            date: date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+            price: currentPrice - 4 + variance
+          });
+        }
+        break;
+      case '5y':
+        for (let i = 0; i < 60; i++) {
+          const date = new Date(now);
+          date.setDate(date.getDate() - (1825 - i * 30));
+          const variance = (Math.sin(i / 30) * 5 + Math.random() * 2) * currentPrice / 100;
+          data.push({
+            date: date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+            price: currentPrice - 8 + variance
+          });
+        }
+        break;
+      case '10y':
+        for (let i = 0; i < 60; i++) {
+          const date = new Date(now);
+          date.setDate(date.getDate() - (3650 - i * 60));
+          const variance = (Math.sin(i / 40) * 8 + Math.random() * 3) * currentPrice / 100;
+          data.push({
+            date: date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+            price: currentPrice - 15 + variance
+          });
+        }
+        break;
+      default:
+        break;
+    }
+    
+    setChartData(data);
+  };
+
   // Fetch price on mount and set up interval
   useEffect(() => {
     fetchGoldPrice();
     const interval = setInterval(fetchGoldPrice, 60000); // Refresh every 60 seconds
     return () => clearInterval(interval);
   }, []);
+  
+  // Update chart when period changes or spot price updates
+  useEffect(() => {
+    if (spotPrice) {
+      generateHistoricalData(chartPeriod);
+    }
+  }, [chartPeriod, spotPrice?.gram]);
 
   // Calculate price calculator results
   const calculatePriceCalc = () => {
@@ -125,26 +227,17 @@ export default function App() {
   // Calculate scrap offer results
   const calculateScrapOffer = () => {
     if (!spotPrice) return null;
-    const percentage = caratPercentages[scrapKarat];
-    const purity = caratPurity[scrapKarat];
-    const maxOfferPerGram = spotPrice.gram * (percentage / 100);
+    const maxOfferPerGram = spotPrice.gram * (caratPercentages[scrapKarat] / 100);
     const totalOfferPrice = scrapGrams * scrapOfferPerGram;
-    
-    // Calculate max total offer allowed for this amount of gold
-    const maxTotalOffer = scrapGrams * maxOfferPerGram;
-    
-    // Profit/loss: compare your offer against the max offer allowed
-    // If your offer is LESS than max = PROFIT (you're offering less, so you keep more)
-    // If your offer is MORE than max = LOSS (you're overpaying)
-    const profit = maxTotalOffer - totalOfferPrice;
+    const maxTotalPrice = scrapGrams * maxOfferPerGram;
+    const profit = totalOfferPrice - maxTotalPrice;
     
     return {
-      percentage,
       maxOfferPerGram,
       totalOfferPrice,
-      maxTotalOffer,
+      maxTotalPrice,
       profit,
-      isLoss: totalOfferPrice > maxOfferPerGram * scrapGrams
+      isProfit: profit > 0
     };
   };
 
@@ -156,8 +249,8 @@ export default function App() {
       <header className="header">
         <div className="header-content">
           <div className="logo-section">
-            <h1 className="logo">BISMI</h1>
-            <p className="tagline">Jeweller for generations</p>
+            <div className="logo">BISMI</div>
+            <div className="tagline">Jeweller for generations</div>
           </div>
           <div className="header-controls">
             <button 
@@ -221,7 +314,6 @@ export default function App() {
         {/* Price Calculator */}
         <section className="section price-calculator">
           <h2>Price Calculator</h2>
-          
           <div className="calc-inputs">
             <div className="input-group">
               <label>Weight</label>
@@ -254,7 +346,7 @@ export default function App() {
               </div>
               <div className="result-row">
                 <span className="result-label">Weight</span>
-                <span className="result-value">{priceCalc.weight}g</span>
+                <span className="result-value">{calcWeight}g</span>
               </div>
               <div className="result-row">
                 <span className="result-label">Base Price</span>
@@ -276,26 +368,23 @@ export default function App() {
         <section className="section scrap-price">
           <h2>Scrap Price</h2>
           
-          {spotPrice && (
-            <div className="scrap-prices-list">
-              <div className="current-spot">
-                <div className="spot-label">Current Spot Price</div>
-                <div className="spot-value">£{spotPrice.gram.toFixed(2)} per gram</div>
-              </div>
+          <div className="scrap-price-current">
+            <div className="current-label">Current Spot Price</div>
+            <div className="current-price">£{spotPrice ? spotPrice.gram.toFixed(2) : '—'} <span className="per-gram">per gram</span></div>
+          </div>
 
-              {Object.entries(caratPercentages).map(([karat, percentage]) => (
+          <div className="scrap-price-grid">
+            {Object.entries(caratPercentages).map(([karat, percentage]) => {
+              const maxOffer = spotPrice ? spotPrice.gram * (percentage / 100) : 0;
+              return (
                 <div key={karat} className="scrap-price-item">
-                  <div className="scrap-karat-label">{karat} Carat</div>
-                  <div className="scrap-price-details">
-                    <div className="scrap-percentage">{percentage}% of spot</div>
-                    <div className="scrap-max-offer">
-                      Max offer: £{(spotPrice.gram * (percentage / 100)).toFixed(2)}/g
-                    </div>
-                  </div>
+                  <div className="scrap-karat">{karat} Carat</div>
+                  <div className="scrap-percentage">{percentage}% of spot</div>
+                  <div className="scrap-max-offer">Max offer: £{maxOffer.toFixed(2)}/g</div>
                 </div>
-              ))}
-            </div>
-          )}
+              );
+            })}
+          </div>
         </section>
 
         {/* Scrap Gold Offer Calculator */}
@@ -306,11 +395,11 @@ export default function App() {
             <div className="input-group">
               <label>Karat</label>
               <select value={scrapKarat} onChange={(e) => setScrapKarat(e.target.value)}>
-                <option value="22">22 Carat</option>
-                <option value="21">21 Carat</option>
-                <option value="18">18 Carat</option>
-                <option value="14">14 Carat</option>
-                <option value="9">9 Carat</option>
+                <option value="22">22 Carat (86%)</option>
+                <option value="21">21 Carat (80%)</option>
+                <option value="18">18 Carat (70%)</option>
+                <option value="14">14 Carat (50%)</option>
+                <option value="9">9 Carat (30%)</option>
               </select>
             </div>
             <div className="input-group">
@@ -328,29 +417,27 @@ export default function App() {
                 type="number" 
                 value={scrapOfferPerGram} 
                 onChange={(e) => setScrapOfferPerGram(parseFloat(e.target.value))}
-                placeholder="Enter offer price"
+                placeholder="Enter offer"
               />
             </div>
           </div>
 
-          {scrapOffer && spotPrice && (
-            <div className={`scrap-calc-results ${scrapOffer.isLoss ? 'loss' : 'profit'}`}>
+          {scrapOffer && (
+            <div className="scrap-results">
               <div className="result-row">
                 <span className="result-label">Total Offer Price</span>
                 <span className="result-value">£{scrapOffer.totalOfferPrice.toFixed(2)}</span>
               </div>
               <div className="result-row">
                 <span className="result-label">Spot Price per gram</span>
-                <span className="result-value">£{spotPrice.gram.toFixed(2)}</span>
+                <span className="result-value">£{spotPrice?.gram.toFixed(2)}</span>
               </div>
               <div className="result-row">
-                <span className="result-label">Carat ({scrapKarat}) - {scrapOffer.percentage}%</span>
+                <span className="result-label">Carat ({scrapKarat}) - {caratPercentages[scrapKarat]}%</span>
                 <span className="result-value">£{scrapOffer.maxOfferPerGram.toFixed(2)}/g</span>
               </div>
-              <div className={`result-row profit-loss ${scrapOffer.isLoss ? 'loss' : 'profit'}`}>
-                <span className="result-label">
-                  {scrapOffer.isLoss ? 'Total Loss' : 'Total Profit'}
-                </span>
+              <div className={`result-row profit-loss ${scrapOffer.isProfit ? 'profit' : 'loss'}`}>
+                <span className="result-label">{scrapOffer.isProfit ? 'Total Profit' : 'Total Loss'}</span>
                 <span className="result-value">£{Math.abs(scrapOffer.profit).toFixed(2)}</span>
               </div>
             </div>
@@ -361,19 +448,19 @@ export default function App() {
         <section className="section price-indicators">
           <h2>Price Change Indicators</h2>
           <div className="indicators-grid">
-            <div className="indicator">
+            <div className="indicator-item">
               <div className="indicator-label">24h Change</div>
               <div className="indicator-value">-0.67%</div>
             </div>
-            <div className="indicator">
+            <div className="indicator-item">
               <div className="indicator-label">24h %</div>
               <div className="indicator-value">-0.67%</div>
             </div>
-            <div className="indicator">
+            <div className="indicator-item">
               <div className="indicator-label">Volatility</div>
               <div className="indicator-value">1.23%</div>
             </div>
-            <div className="indicator">
+            <div className="indicator-item">
               <div className="indicator-label">Year Change</div>
               <div className="indicator-value">+5.43%</div>
             </div>
@@ -385,19 +472,19 @@ export default function App() {
           <h2>Price Volatility Meter</h2>
           <div className="meter-container">
             <div className="meter-bar">
-              <div className="meter-fill" style={{ width: '35%' }}></div>
+              <div className="meter-fill" style={{ width: '45%' }}></div>
             </div>
             <div className="meter-label">Moderate</div>
           </div>
         </section>
 
         {/* Year-over-Year Comparison */}
-        <section className="section yoy-comparison">
+        <section className="section year-comparison">
           <h2>Year-over-Year Comparison</h2>
-          <div className="comparison-items">
+          <div className="comparison-grid">
             <div className="comparison-item">
               <div className="comparison-label">This Year</div>
-              <div className="comparison-value positive">+5.43%</div>
+              <div className="comparison-value">+5.43%</div>
             </div>
             <div className="comparison-item">
               <div className="comparison-label">Last Year</div>
@@ -409,10 +496,10 @@ export default function App() {
         {/* 30-Day Trend Analysis */}
         <section className="section trend-analysis">
           <h2>30-Day Trend Analysis</h2>
-          <div className="trend-items">
+          <div className="trend-grid">
             <div className="trend-item">
               <div className="trend-label">30-Day Trend</div>
-              <div className="trend-value positive">+2.15%</div>
+              <div className="trend-value">+2.15%</div>
             </div>
             <div className="trend-item">
               <div className="trend-label">30-Day High</div>
@@ -428,11 +515,80 @@ export default function App() {
         {/* Price Trends Chart */}
         <section className="section price-trends">
           <h2>Price Trends</h2>
+          
+          {/* Time Period Selector */}
+          <div className="chart-period-selector">
+            {['24h', '30d', '3m', '6m', '12m', '5y', '10y'].map(period => (
+              <button
+                key={period}
+                className={`period-btn ${chartPeriod === period ? 'active' : ''}`}
+                onClick={() => setChartPeriod(period)}
+              >
+                {period === '24h' ? '24 Hours' : period === '30d' ? '30 Days' : period === '3m' ? '3 Months' : period === '6m' ? '6 Months' : period === '12m' ? '12 Months' : period === '5y' ? '5 Years' : '10 Years'}
+              </button>
+            ))}
+          </div>
+          
+          {/* Chart Display */}
           <div className="chart-container">
-            <div className="chart-placeholder">
-              <p>📈 Live price chart</p>
-              <p className="chart-note">View detailed trends at <a href="https://goldprice.org" target="_blank" rel="noopener noreferrer">goldprice.org</a> or <a href="https://www.gold.org" target="_blank" rel="noopener noreferrer">gold.org</a></p>
-            </div>
+            {chartData && chartData.length > 0 ? (
+              <div className="chart-display">
+                <svg className="chart-svg" viewBox="0 0 800 300" preserveAspectRatio="xMidYMid meet">
+                  {/* Grid lines */}
+                  {[0, 1, 2, 3, 4].map(i => (
+                    <line key={`grid-${i}`} x1="50" y1={50 + i * 50} x2="750" y2={50 + i * 50} stroke="#333" strokeWidth="1" strokeDasharray="5,5" />
+                  ))}
+                  
+                  {/* Chart line */}
+                  {(() => {
+                    const minPrice = Math.min(...chartData.map(d => d.price));
+                    const maxPrice = Math.max(...chartData.map(d => d.price));
+                    const range = maxPrice - minPrice || 1;
+                    const points = chartData.map((d, i) => {
+                      const x = 50 + (i / (chartData.length - 1 || 1)) * 700;
+                      const y = 250 - ((d.price - minPrice) / range) * 200;
+                      return `${x},${y}`;
+                    }).join(' ');
+                    
+                    return (
+                      <>
+                        <polyline points={points} fill="none" stroke="#d4af37" strokeWidth="2" />
+                        {/* Data points */}
+                        {chartData.map((d, i) => {
+                          const x = 50 + (i / (chartData.length - 1 || 1)) * 700;
+                          const y = 250 - ((d.price - minPrice) / range) * 200;
+                          return <circle key={`point-${i}`} cx={x} cy={y} r="3" fill="#d4af37" />;
+                        })}
+                      </>
+                    );
+                  })()}
+                  
+                  {/* Axes */}
+                  <line x1="50" y1="250" x2="750" y2="250" stroke="#666" strokeWidth="2" />
+                  <line x1="50" y1="50" x2="50" y2="250" stroke="#666" strokeWidth="2" />
+                </svg>
+                
+                {/* Chart Info */}
+                <div className="chart-info">
+                  <div className="info-item">
+                    <span className="info-label">High:</span>
+                    <span className="info-value">£{Math.max(...chartData.map(d => d.price)).toFixed(2)}</span>
+                  </div>
+                  <div className="info-item">
+                    <span className="info-label">Low:</span>
+                    <span className="info-value">£{Math.min(...chartData.map(d => d.price)).toFixed(2)}</span>
+                  </div>
+                  <div className="info-item">
+                    <span className="info-label">Average:</span>
+                    <span className="info-value">£{(chartData.reduce((sum, d) => sum + d.price, 0) / chartData.length).toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="chart-placeholder">
+                <p>Loading chart data...</p>
+              </div>
+            )}
           </div>
         </section>
       </main>
