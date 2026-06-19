@@ -188,12 +188,6 @@ export default function App() {
         <section className="section gold-bar-prices">
           <h2>Gold Bar Prices</h2>
           
-          {/* Header Row */}
-          <div className="bar-prices-header">
-            <div className="header-col weight-col">Weight</div>
-            <div className="header-col price-col">Gold Bar Price</div>
-          </div>
-
           {/* Bar Prices Grid */}
           <div className="bar-prices-grid">
             {[100, 50, 31.1035, 20, 10, 5, 2.5].map(weight => {
@@ -201,10 +195,10 @@ export default function App() {
               const markup = barMarkups[weight];
               const adjustmentAmount = basePrice * (markup / 100);
               const totalPrice = basePrice + adjustmentAmount;
-              const displayWeight = weight === 31.1035 ? '1 oz' : `${weight}g`;
+              const displayWeight = weight === 31.1035 ? '1 ounce' : `${weight} gram`;
               return (
                 <div key={weight} className="bar-price-row">
-                  <div className="bar-weight weight-col">{displayWeight}</div>
+                  <div className="bar-weight weight-col"><strong>{displayWeight}</strong></div>
                   <div className="bar-price price-col">£{totalPrice.toFixed(2)}</div>
                 </div>
               );

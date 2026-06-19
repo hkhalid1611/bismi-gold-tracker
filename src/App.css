@@ -209,16 +209,24 @@ body {
   grid-template-columns: 1fr 1fr;
   gap: 15px;
   background-color: var(--tertiary-bg);
-  padding: 12px;
+  padding: 12px 15px;
   border-radius: 6px;
   border: 1px solid var(--border-color);
   align-items: center;
+  justify-items: stretch;
 }
 
 .bar-weight {
-  font-size: 13px;
+  font-size: 14px;
   color: var(--text-secondary);
   text-align: left;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+.bar-weight strong {
+  font-weight: 700;
 }
 
 .bar-price {
@@ -226,6 +234,9 @@ body {
   font-weight: 700;
   color: var(--accent-gold);
   text-align: right;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
 }
 
 /* Calculator Inputs */
