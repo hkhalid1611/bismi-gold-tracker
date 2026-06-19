@@ -119,14 +119,18 @@ export default function App() {
     const purity = caratPurity[scrapKarat];
     const maxOfferPerGram = spotPrice.gram * (percentage / 100);
     const totalOfferPrice = scrapGrams * scrapOfferPerGram;
-    const spotValue = scrapGrams * spotPrice.gram * purity;
-    const profit = totalOfferPrice - spotValue;
+    
+    // Calculate the actual value of the gold based on purity and spot price
+    const actualGoldValue = scrapGrams * spotPrice.gram * purity;
+    
+    // Profit/loss is the difference between offer and actual gold value
+    const profit = totalOfferPrice - actualGoldValue;
     
     return {
       percentage,
       maxOfferPerGram,
       totalOfferPrice,
-      spotValue,
+      actualGoldValue,
       profit,
       isLoss: profit < 0
     };
@@ -184,8 +188,8 @@ export default function App() {
           
           {/* Header Row */}
           <div className="bar-prices-header">
-            <div className="header-col">Weight</div>
-            <div className="header-col">Gold Bar Price</div>
+            <div className="header-col weight-col">Weight</div>
+            <div className="header-col price-col">Gold Bar Price</div>
           </div>
 
           {/* Bar Prices Grid */}
@@ -198,8 +202,8 @@ export default function App() {
               const displayWeight = weight === 31.1035 ? '1 oz' : `${weight}g`;
               return (
                 <div key={weight} className="bar-price-row">
-                  <div className="bar-weight">{displayWeight}</div>
-                  <div className="bar-price">£{totalPrice.toFixed(2)}</div>
+                  <div className="bar-weight weight-col">{displayWeight}</div>
+                  <div className="bar-price price-col">£{totalPrice.toFixed(2)}</div>
                 </div>
               );
             })}
@@ -322,7 +326,7 @@ export default function App() {
           </div>
 
           {scrapOffer && spotPrice && (
-            <div className="scrap-calc-results">
+            <div className={`scrap-calc-results ${scrapOffer.isLoss ? 'loss' : 'profit'}`}>
               <div className="result-row">
                 <span className="result-label">Total Offer Price</span>
                 <span className="result-value">£{scrapOffer.totalOfferPrice.toFixed(2)}</span>
