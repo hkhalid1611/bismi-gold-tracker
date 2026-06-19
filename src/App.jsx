@@ -7,6 +7,8 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [lastUpdate, setLastUpdate] = useState(null);
+  const [priceChange, setPriceChange] = useState(0);
+  const [previousPrice, setPreviousPrice] = useState(null);
   
   // Gold bar markup percentages for each weight
   const barMarkups = {
@@ -73,6 +75,14 @@ export default function App() {
       if (data && data.price) {
         // Convert ounce to gram (1 ounce = 31.1035 grams)
         const pricePerGram = data.price / 31.1035;
+        
+        // Calculate price change percentage
+        if (previousPrice !== null) {
+          const change = ((pricePerGram - previousPrice) / previousPrice) * 100;
+          setPriceChange(change);
+        }
+        
+        setPreviousPrice(pricePerGram);
         setSpotPrice({
           gram: pricePerGram,
           ounce: data.price,
@@ -169,6 +179,7 @@ export default function App() {
       <main className="main-content">
         {/* Live Gold Spot Price */}
         <section className="section spot-price">
+          <h2>Live Gold Spot Price</h2>
           <div className="spot-price-display">
             <div className="price-value">
               £{spotPrice ? spotPrice[priceUnit].toFixed(2) : '—'}
@@ -176,6 +187,14 @@ export default function App() {
             <div className="price-label">
               {priceUnit === 'gram' ? 'per gram' : 'per ounce'}
             </div>
+          </div>
+          <div className={`price-change-indicator ${priceChange > 0 ? 'up' : priceChange < 0 ? 'down' : 'neutral'}`}>
+            <span className="change-arrow">
+              {priceChange > 0 ? '↑' : priceChange < 0 ? '↓' : '—'}
+            </span>
+            <span className="change-percent">
+              {Math.abs(priceChange).toFixed(2)}%
+            </span>
           </div>
           {lastUpdate && (
             <div className="last-update">
