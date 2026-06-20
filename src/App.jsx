@@ -305,7 +305,7 @@ export default function App() {
               const scrapCalc = calculateScrapOfferForKarat(karat);
               
               return (
-                <div key={karat} className="scrap-accordion-item">
+                <div key={karat} className={`scrap-accordion-item ${isExpanded ? 'expanded' : ''}`}>
                   <div 
                     className="scrap-accordion-header"
                     onClick={() => setExpandedKarat(isExpanded ? null : karat)}

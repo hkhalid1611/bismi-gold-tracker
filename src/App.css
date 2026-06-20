@@ -744,6 +744,12 @@ body {
   border: 1px solid var(--border-color);
   border-radius: 6px;
   overflow: hidden;
+  transition: border-color 0.3s ease;
+}
+
+.scrap-accordion-item.expanded {
+  border: 2px solid var(--accent-gold);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
 }
 
 .scrap-accordion-header {
