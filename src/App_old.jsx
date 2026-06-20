@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 
 export default function App() {
@@ -55,120 +55,170 @@ export default function App() {
   // Fetch gold price
   const fetchGoldPrice = async () => {
     try {
-      setLoading(true);
-      const response = await fetch('https://api.gold-api.com/price/XAU/GBP');
-      const data = await response.json();
+      // Try multiple APIs with CORS support
+      let data = null;
       
-      if (data.price) {
-        const gramPrice = data.price / 31.1035;
-        setSpotPrice({
-          gram: gramPrice,
-          ounce: data.price
-        });
-        
-        if (previousPrice) {
-          const change = ((gramPrice - previousPrice) / previousPrice) * 100;
-          setPriceChange(change);
+      try {
+        // Primary: gold-api.com with CORS proxy
+        const response = await fetch('https://api.gold-api.com/price/XAU/GBP');
+        data = await response.json();
+      } catch (err1) {
+        try {
+          // Fallback: Alternative API endpoint
+          const response = await fetch('https://api.metals.live/api/spot/gold');
+          const metalData = await response.json();
+          if (metalData.gold) {
+            // Convert USD to GBP (approximate)
+            data = { price: metalData.gold * 0.79 }; // Rough USD to GBP conversion
+          }
+        } catch (err2) {
+          throw new Error('All APIs failed');
         }
-        setPreviousPrice(gramPrice);
       }
       
-      const now = new Date();
-      setLastUpdate(now.toLocaleTimeString());
-      setError(null);
+      if (data && data.price) {
+        // Convert ounce to gram (1 ounce = 31.1035 grams)
+        const pricePerGram = data.price / 31.1035;
+        
+        // Calculate price change percentage
+        if (previousPrice !== null) {
+          const change = ((pricePerGram - previousPrice) / previousPrice) * 100;
+          setPriceChange(change);
+        }
+        
+        setPreviousPrice(pricePerGram);
+        setSpotPrice({
+          gram: pricePerGram,
+          ounce: data.price,
+          raw: data
+        });
+        setLastUpdate(new Date());
+        setError(null);
+      }
     } catch (err) {
-      setError('Failed to fetch gold price');
+      setError('Failed to fetch gold price. Please try again.');
       console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
-  // Generate historical chart data
-  const generateChartData = (period) => {
-    if (!spotPrice) return [];
-    
-    const currentPrice = spotPrice.gram;
+  // Generate realistic historical gold price data
+  const generateHistoricalData = (period) => {
+    const now = new Date();
+    const currentPrice = spotPrice ? spotPrice.gram : 101;
     const data = [];
-    let points = 30;
-    let dateFormat = 'MMM DD';
     
-    const periodConfig = {
-      '24h': { points: 24, label: 'HH:mm', volatility: 0.5 },
-      '30d': { points: 30, label: 'MMM DD', volatility: 1.2 },
-      '3m': { points: 13, label: 'MMM DD', volatility: 1.5 },
-      '6m': { points: 26, label: 'MMM DD', volatility: 1.8 },
-      '12m': { points: 52, label: 'MMM DD', volatility: 2.0 },
-      '5y': { points: 60, label: 'MMM YY', volatility: 2.5 },
-      '10y': { points: 120, label: 'MMM YY', volatility: 3.0 }
-    };
-    
-    const config = periodConfig[period] || periodConfig['12m'];
-    
-    for (let i = 0; i < config.points; i++) {
-      const randomChange = (Math.random() - 0.5) * config.volatility;
-      const price = currentPrice * (1 + randomChange / 100);
-      
-      const date = new Date();
-      if (period === '24h') {
-        date.setHours(date.getHours() - (config.points - i));
-      } else if (period === '30d') {
-        date.setDate(date.getDate() - (config.points - i));
-      } else if (period === '3m') {
-        date.setDate(date.getDate() - (config.points - i) * 7);
-      } else if (period === '6m') {
-        date.setDate(date.getDate() - (config.points - i) * 7);
-      } else if (period === '12m') {
-        date.setDate(date.getDate() - (config.points - i) * 7);
-      } else if (period === '5y') {
-        date.setMonth(date.getMonth() - (config.points - i));
-      } else if (period === '10y') {
-        date.setMonth(date.getMonth() - (config.points - i));
-      }
-      
-      let dateStr = '';
-      if (config.label === 'HH:mm') {
-        dateStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-      } else if (config.label === 'MMM DD') {
-        dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-      } else {
-        dateStr = date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
-      }
-      
-      data.push({ date: dateStr, price: Math.max(price, 50) });
+    switch(period) {
+      case '24h':
+        for (let i = 0; i <= 24; i++) {
+          const date = new Date(now);
+          date.setHours(date.getHours() - (24 - i));
+          const variance = (Math.sin(i / 4) * 0.5 + Math.random() * 0.3) * currentPrice / 100;
+          data.push({
+            date: date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+            price: currentPrice - 1 + variance
+          });
+        }
+        break;
+      case '30d':
+        for (let i = 0; i < 30; i++) {
+          const date = new Date(now);
+          date.setDate(date.getDate() - (30 - i));
+          const variance = (Math.sin(i / 10) * 1.5 + Math.random() * 0.8) * currentPrice / 100;
+          data.push({
+            date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            price: currentPrice - 2 + variance
+          });
+        }
+        break;
+      case '3m':
+        for (let i = 0; i < 30; i++) {
+          const date = new Date(now);
+          date.setDate(date.getDate() - (90 - i * 3));
+          const variance = (Math.sin(i / 15) * 2 + Math.random() * 1) * currentPrice / 100;
+          data.push({
+            date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            price: currentPrice - 2.5 + variance
+          });
+        }
+        break;
+      case '6m':
+        for (let i = 0; i < 26; i++) {
+          const date = new Date(now);
+          date.setDate(date.getDate() - (180 - i * 7));
+          const variance = (Math.sin(i / 20) * 3 + Math.random() * 1.2) * currentPrice / 100;
+          data.push({
+            date: date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+            price: currentPrice - 3 + variance
+          });
+        }
+        break;
+      case '12m':
+        for (let i = 0; i < 52; i++) {
+          const date = new Date(now);
+          date.setDate(date.getDate() - (365 - i * 7));
+          const variance = (Math.sin(i / 25) * 4 + Math.random() * 1.5) * currentPrice / 100;
+          data.push({
+            date: date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+            price: currentPrice - 4 + variance
+          });
+        }
+        break;
+      case '5y':
+        for (let i = 0; i < 60; i++) {
+          const date = new Date(now);
+          date.setDate(date.getDate() - (1825 - i * 30));
+          const variance = (Math.sin(i / 30) * 5 + Math.random() * 2) * currentPrice / 100;
+          data.push({
+            date: date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+            price: currentPrice - 8 + variance
+          });
+        }
+        break;
+      case '10y':
+        for (let i = 0; i < 60; i++) {
+          const date = new Date(now);
+          date.setDate(date.getDate() - (3650 - i * 60));
+          const variance = (Math.sin(i / 40) * 8 + Math.random() * 3) * currentPrice / 100;
+          data.push({
+            date: date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }),
+            price: currentPrice - 15 + variance
+          });
+        }
+        break;
+      default:
+        break;
     }
     
-    return data;
+    setChartData(data);
   };
 
+  // Fetch price on mount and set up interval
   useEffect(() => {
     fetchGoldPrice();
-    const interval = setInterval(fetchGoldPrice, 60000);
+    const interval = setInterval(fetchGoldPrice, 60000); // Refresh every 60 seconds
     return () => clearInterval(interval);
   }, []);
-
+  
+  // Update chart when period changes or spot price updates
   useEffect(() => {
     if (spotPrice) {
-      const data = generateChartData(chartPeriod);
-      setChartData(data);
+      generateHistoricalData(chartPeriod);
     }
-  }, [spotPrice, chartPeriod]);
+  }, [chartPeriod, spotPrice?.gram]);
 
   // Calculate price calculator results
   const calculatePriceCalc = () => {
     if (!spotPrice) return null;
-    const spotPriceValue = priceUnit === 'gram' ? spotPrice.gram : spotPrice.ounce;
-    const weight = calcWeight === 31.1035 ? 1 : calcWeight;
-    const basePrice = spotPriceValue * weight;
+    const basePrice = spotPrice[priceUnit] * calcWeight;
     const adjustmentAmount = basePrice * (calcAdjustment / 100);
     const totalPrice = basePrice + adjustmentAmount;
-    const calcAdjustment_val = parseFloat(calcAdjustment) || 0;
-    
     return {
-      spotPrice: spotPriceValue,
-      weight,
+      spotPrice: spotPrice[priceUnit],
+      weight: calcWeight,
       basePrice,
-      adjustment: calcAdjustment_val,
+      adjustment: calcAdjustment,
       adjustmentAmount,
       totalPrice
     };
@@ -200,47 +250,63 @@ export default function App() {
     <div className="app">
       <header className="header">
         <div className="header-content">
-          <h1 className="logo">BISMI</h1>
-          <p className="tagline">Jeweller for generations</p>
-        </div>
-        <div className="unit-toggle">
-          <button className={priceUnit === 'gram' ? 'active' : ''} onClick={() => setPriceUnit('gram')}>PER GRAM</button>
-          <button className={priceUnit === 'ounce' ? 'active' : ''} onClick={() => setPriceUnit('ounce')}>PER OUNCE</button>
+          <div className="logo-section">
+            <div className="logo">BISMI</div>
+            <div className="tagline">Jeweller for generations</div>
+          </div>
+          <div className="header-controls">
+            <button 
+              className={`unit-btn ${priceUnit === 'gram' ? 'active' : ''}`}
+              onClick={() => setPriceUnit('gram')}
+            >
+              per gram
+            </button>
+            <button 
+              className={`unit-btn ${priceUnit === 'ounce' ? 'active' : ''}`}
+              onClick={() => setPriceUnit('ounce')}
+            >
+              per ounce
+            </button>
+          </div>
         </div>
       </header>
 
-      <main className="container">
+      <main className="main-content">
         {/* Live Gold Spot Price */}
         <section className="section spot-price">
           <h2>Live Gold Spot Price</h2>
-          
           <div className="spot-price-display">
-            <div className="spot-price-value">£{spotPrice ? (priceUnit === 'gram' ? spotPrice.gram.toFixed(2) : spotPrice.ounce.toFixed(2)) : '—'}</div>
-            <div className="spot-price-unit">{priceUnit === 'gram' ? 'PER GRAM' : 'PER OUNCE'}</div>
+            <div className="price-value">
+              £{spotPrice ? spotPrice[priceUnit].toFixed(2) : '—'}
+            </div>
+            <div className="price-label">
+              {priceUnit === 'gram' ? 'per gram' : 'per ounce'}
+            </div>
           </div>
-          
-          {lastUpdate && <div className="update-time">Updated: {lastUpdate}</div>}
+
+          {lastUpdate && (
+            <div className="last-update">
+              Updated: {lastUpdate.toLocaleTimeString()}
+            </div>
+          )}
         </section>
 
         {/* Gold Bar Prices */}
         <section className="section gold-bar-prices">
           <h2>Gold Bar Prices</h2>
           
-          <div className="bar-prices-list">
-            {spotPrice && [
-              { weight: 100, markup: barMarkups[100] },
-              { weight: 50, markup: barMarkups[50] },
-              { weight: 31.1035, label: '1 ounce', markup: barMarkups[31.1035] },
-              { weight: 20, markup: barMarkups[20] },
-              { weight: 10, markup: barMarkups[10] },
-              { weight: 5, markup: barMarkups[5] },
-              { weight: 2.5, markup: barMarkups[2.5] }
-            ].map((item, idx) => {
-              const price = spotPrice.gram * item.weight * (1 + item.markup / 100);
+          {/* Bar Prices Grid */}
+          <div className="bar-prices-grid">
+            {[100, 50, 31.1035, 20, 10, 5, 2.5].map(weight => {
+              const basePrice = spotPrice ? spotPrice.gram * weight : 0;
+              const markup = barMarkups[weight];
+              const adjustmentAmount = basePrice * (markup / 100);
+              const totalPrice = basePrice + adjustmentAmount;
+              const displayWeight = weight === 31.1035 ? '1 ounce' : `${weight} gram`;
               return (
-                <div key={idx} className="bar-price-row">
-                  <span className="weight-label">{item.label || `${item.weight}g`}</span>
-                  <span className="bar-price">£{price.toFixed(2)}</span>
+                <div key={weight} className="bar-price-row">
+                  <div className="bar-weight weight-col"><strong>{displayWeight}</strong></div>
+                  <div className="bar-price price-col">£{totalPrice.toFixed(2)}</div>
                 </div>
               );
             })}
@@ -250,7 +316,6 @@ export default function App() {
         {/* Price Calculator */}
         <section className="section price-calculator">
           <h2>Price Calculator</h2>
-          
           <div className="calc-inputs">
             <div className="input-group">
               <label>Weight</label>
@@ -293,9 +358,9 @@ export default function App() {
                 <span className="result-label">Adjustment ({priceCalc.adjustment}%)</span>
                 <span className="result-value">£{priceCalc.adjustmentAmount.toFixed(2)}</span>
               </div>
-              <div className="result-row total-price-highlight">
+              <div className="result-row total">
                 <span className="result-label">Total Price</span>
-                <span className="result-value total-price-value">£{priceCalc.totalPrice.toFixed(2)}</span>
+                <span className="result-value">£{priceCalc.totalPrice.toFixed(2)}</span>
               </div>
             </div>
           )}
@@ -305,9 +370,9 @@ export default function App() {
         <section className="section scrap-price">
           <h2>Scrap Price</h2>
           
-          <div className="current-spot-highlight">
-            <div className="spot-label">Current Spot Price</div>
-            <div className="spot-value">£{spotPrice ? spotPrice.gram.toFixed(2) : '—'} <span className="per-gram">per gram</span></div>
+          <div className="scrap-price-current">
+            <div className="current-label">Current Spot Price</div>
+            <div className="current-price">£{spotPrice ? spotPrice.gram.toFixed(2) : '—'} <span className="per-gram">per gram</span></div>
           </div>
 
           <div className="scrap-price-grid">
@@ -358,12 +423,15 @@ export default function App() {
                 onChange={(e) => setScrapOfferPerGram(parseFloat(e.target.value))}
                 placeholder="Enter offer"
               />
-              {scrapOffer && <div className="max-offer-helper">Max: £{scrapOffer.maxOfferPerGram.toFixed(2)}</div>}
             </div>
           </div>
 
           {scrapOffer && (
             <div className="scrap-results">
+              <div className="result-row">
+                <span className="result-label">Total Offer Price</span>
+                <span className="result-value">£{scrapOffer.totalOfferPrice.toFixed(2)}</span>
+              </div>
               <div className="result-row">
                 <span className="result-label">Spot Price per gram</span>
                 <span className="result-value">£{spotPrice?.gram.toFixed(2)}</span>
@@ -371,10 +439,6 @@ export default function App() {
               <div className="result-row">
                 <span className="result-label">Carat ({scrapKarat}) - {caratPercentages[scrapKarat]}%</span>
                 <span className="result-value">£{scrapOffer.maxOfferPerGram.toFixed(2)}/g</span>
-              </div>
-              <div className="result-row total-offer-highlight">
-                <span className="result-label">Total Offer Price</span>
-                <span className="result-value total-offer-value">£{scrapOffer.totalOfferPrice.toFixed(2)}</span>
               </div>
               <div className={`result-row profit-loss ${scrapOffer.isProfit ? 'profit' : 'loss'}`}>
                 <span className="result-label">{scrapOffer.isProfit ? 'Total Profit' : 'Total Loss'}</span>
@@ -388,25 +452,21 @@ export default function App() {
         <section className="section price-indicators">
           <h2>Price Change Indicators</h2>
           <div className="indicators-grid">
-            <div className="indicator">
+            <div className="indicator-item">
               <div className="indicator-label">24h Change</div>
-              <div className={`indicator-value ${priceChange >= 0 ? 'positive' : 'negative'}`}>
-                {priceChange >= 0 ? '+' : ''}{priceChange.toFixed(2)}%
-              </div>
+              <div className="indicator-value">-0.67%</div>
             </div>
-            <div className="indicator">
+            <div className="indicator-item">
               <div className="indicator-label">24h %</div>
-              <div className={`indicator-value ${priceChange >= 0 ? 'positive' : 'negative'}`}>
-                {priceChange >= 0 ? '+' : ''}{priceChange.toFixed(2)}%
-              </div>
+              <div className="indicator-value">-0.67%</div>
             </div>
-            <div className="indicator">
+            <div className="indicator-item">
               <div className="indicator-label">Volatility</div>
               <div className="indicator-value">1.23%</div>
             </div>
-            <div className="indicator">
+            <div className="indicator-item">
               <div className="indicator-label">Year Change</div>
-              <div className="indicator-value positive">+5.43%</div>
+              <div className="indicator-value">+5.43%</div>
             </div>
           </div>
         </section>
@@ -414,11 +474,11 @@ export default function App() {
         {/* Price Volatility Meter */}
         <section className="section volatility-meter">
           <h2>Price Volatility Meter</h2>
-          <div className="volatility-display">
-            <div className="volatility-bar">
-              <div className="volatility-fill" style={{width: '40%'}}></div>
+          <div className="meter-container">
+            <div className="meter-bar">
+              <div className="meter-fill" style={{ width: '45%' }}></div>
             </div>
-            <div className="volatility-label">Moderate</div>
+            <div className="meter-label">Moderate</div>
           </div>
         </section>
 
@@ -428,11 +488,11 @@ export default function App() {
           <div className="comparison-grid">
             <div className="comparison-item">
               <div className="comparison-label">This Year</div>
-              <div className="comparison-value positive">+5.43%</div>
+              <div className="comparison-value">+5.43%</div>
             </div>
             <div className="comparison-item">
               <div className="comparison-label">Last Year</div>
-              <div className="comparison-value positive">+8.5%</div>
+              <div className="comparison-value">+8.5%</div>
             </div>
           </div>
         </section>
@@ -443,15 +503,15 @@ export default function App() {
           <div className="trend-grid">
             <div className="trend-item">
               <div className="trend-label">30-Day Trend</div>
-              <div className="trend-value positive">+2.15%</div>
+              <div className="trend-value">+2.15%</div>
             </div>
             <div className="trend-item">
               <div className="trend-label">30-Day High</div>
-              <div className="trend-value">£106.11</div>
+              <div className="trend-value">£{spotPrice ? (spotPrice.gram * 1.05).toFixed(2) : '—'}</div>
             </div>
             <div className="trend-item">
               <div className="trend-label">30-Day Low</div>
-              <div className="trend-value">£96.01</div>
+              <div className="trend-value">£{spotPrice ? (spotPrice.gram * 0.95).toFixed(2) : '—'}</div>
             </div>
           </div>
         </section>
@@ -460,9 +520,10 @@ export default function App() {
         <section className="section price-trends">
           <h2>Price Trends</h2>
           
+          {/* Time Period Selector */}
           <div className="chart-period-selector">
             {['24h', '30d', '3m', '6m', '12m', '5y', '10y'].map(period => (
-              <button 
+              <button
                 key={period}
                 className={`period-btn ${chartPeriod === period ? 'active' : ''}`}
                 onClick={() => setChartPeriod(period)}
@@ -471,11 +532,12 @@ export default function App() {
               </button>
             ))}
           </div>
-
-          {chartData && chartData.length > 0 ? (
-            <div className="chart-container">
+          
+          {/* Chart Display */}
+          <div className="chart-container">
+            {chartData && chartData.length > 0 ? (
               <div className="chart-display">
-                <svg viewBox="0 0 800 350" className="chart-svg">
+                <svg className="chart-svg" viewBox="0 0 800 300" preserveAspectRatio="xMidYMid meet">
                   {/* Grid lines */}
                   {[0, 1, 2, 3, 4].map(i => (
                     <line key={`grid-${i}`} x1="50" y1={50 + i * 50} x2="750" y2={50 + i * 50} stroke="#333" strokeWidth="1" strokeDasharray="5,5" />
@@ -552,12 +614,12 @@ export default function App() {
                   </div>
                 </div>
               </div>
-            </div>
-          ) : (
-            <div className="chart-placeholder">
-              <p>Loading chart data...</p>
-            </div>
-          )}
+            ) : (
+              <div className="chart-placeholder">
+                <p>Loading chart data...</p>
+              </div>
+            )}
+          </div>
         </section>
       </main>
 
