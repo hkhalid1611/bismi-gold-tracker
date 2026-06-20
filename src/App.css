@@ -673,3 +673,163 @@ body {
     font-size: 16px;
   }
 }
+
+/* Section Header with Icon */
+.section-header-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.section-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+/* Spot Price Header */
+.spot-price-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.spot-price-header h2 {
+  margin: 0;
+}
+
+.unit-toggle-inline {
+  display: flex;
+  gap: 8px;
+}
+
+.unit-toggle-inline button {
+  padding: 6px 12px;
+  background-color: var(--tertiary-bg);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+.unit-toggle-inline button:hover {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
+.unit-toggle-inline button.active {
+  background-color: var(--accent-gold);
+  color: var(--primary-bg);
+  border-color: var(--accent-gold);
+}
+
+/* Scrap Price Accordion */
+.scrap-price-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.scrap-accordion-item {
+  background-color: var(--tertiary-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.scrap-accordion-header {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 15px;
+  align-items: center;
+  padding: 12px 15px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  user-select: none;
+}
+
+.scrap-accordion-header:hover {
+  background-color: var(--secondary-bg);
+}
+
+.accordion-toggle {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  width: 24px;
+  text-align: center;
+}
+
+.scrap-accordion-content {
+  padding: 15px;
+  border-top: 1px solid var(--border-color);
+  background-color: var(--secondary-bg);
+}
+
+.scrap-accordion-content .input-group {
+  margin-bottom: 12px;
+}
+
+.scrap-accordion-content .input-group:last-of-type {
+  margin-bottom: 15px;
+}
+
+.scrap-accordion-content .scrap-results {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Logo Section */
+.logo-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .spot-price-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .unit-toggle-inline {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .scrap-accordion-header {
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+  }
+
+  .scrap-max-offer {
+    order: -1;
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .accordion-toggle {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .section-header-with-icon {
+    flex-wrap: wrap;
+  }
+
+  .section-icon {
+    width: 28px;
+    height: 28px;
+  }
+}
