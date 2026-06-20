@@ -200,19 +200,23 @@ export default function App() {
     <div className="app">
       <header className="header">
         <div className="header-content">
-          <h1 className="logo">BISMI</h1>
-          <p className="tagline">Jeweller for generations</p>
-        </div>
-        <div className="unit-toggle">
-          <button className={priceUnit === 'gram' ? 'active' : ''} onClick={() => setPriceUnit('gram')}>PER GRAM</button>
-          <button className={priceUnit === 'ounce' ? 'active' : ''} onClick={() => setPriceUnit('ounce')}>PER OUNCE</button>
+          <div className="logo-section">
+            <h1 className="logo">BISMI</h1>
+            <p className="tagline">Jeweller for generations</p>
+          </div>
         </div>
       </header>
 
       <main className="container">
         {/* Live Gold Spot Price */}
         <section className="section spot-price">
-          <h2>Live Gold Spot Price</h2>
+          <div className="spot-price-header">
+            <h2>Live Gold Spot Price</h2>
+            <div className="unit-toggle-inline">
+              <button className={priceUnit === 'gram' ? 'active' : ''} onClick={() => setPriceUnit('gram')}>PER GRAM</button>
+              <button className={priceUnit === 'ounce' ? 'active' : ''} onClick={() => setPriceUnit('ounce')}>PER OUNCE</button>
+            </div>
+          </div>
           
           <div className="spot-price-display">
             <div className="spot-price-value">£{spotPrice ? (priceUnit === 'gram' ? spotPrice.gram.toFixed(2) : spotPrice.ounce.toFixed(2)) : '—'}</div>
@@ -224,7 +228,10 @@ export default function App() {
 
         {/* Gold Bar Prices */}
         <section className="section gold-bar-prices">
-          <h2>Gold Bar Prices</h2>
+          <div className="section-header-with-icon">
+            <h2>Gold Bar Prices</h2>
+            <img src="/gold-bars-icon.png" alt="Gold Bars" className="section-icon" />
+          </div>
           
           <div className="bar-prices-list">
             {spotPrice && [
