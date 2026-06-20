@@ -153,7 +153,8 @@ export default function App() {
     const offerPerGram = scrapOfferByKarat[karat] || 0;
     const totalOfferPrice = grams * offerPerGram;
     const maxTotalOffer = grams * maxOfferPerGram;
-    const profit = totalOfferPrice - maxTotalOffer;
+    // Profit = max total offer - your offer (if you offer less, you make profit)
+    const profit = maxTotalOffer - totalOfferPrice;
     
     return {
       maxOfferPerGram,
@@ -493,9 +494,22 @@ export default function App() {
                 strokeWidth="2"
               />
 
-              {/* Axis labels */}
+              {/* Vertical axis price labels */}
+              {[0, 0.25, 0.5, 0.75, 1].map((ratio, idx) => {
+                const minPrice = Math.min(...chartData.map(p => p.price));
+                const maxPrice = Math.max(...chartData.map(p => p.price));
+                const price = minPrice + (maxPrice - minPrice) * ratio;
+                const y = 250 - ratio * 200;
+                return (
+                  <text key={`y-${idx}`} x="35" y={y + 4} textAnchor="end" fontSize="10" fill="#d4af37">
+                    £{price.toFixed(0)}
+                  </text>
+                );
+              })}
+
+              {/* Horizontal axis date labels */}
               {[0, Math.floor(chartData.length / 4), Math.floor(chartData.length / 2), Math.floor(chartData.length * 3 / 4), chartData.length - 1].map((i) => (
-                <text key={`x-${i}`} x={50 + (i / (chartData.length - 1)) * 700} y="275" textAnchor="middle" fontSize="11" fill="#999">
+                <text key={`x-${i}`} x={50 + (i / (chartData.length - 1)) * 700} y="275" textAnchor="middle" fontSize="11" fill="#d4af37">
                   {new Date(Date.now() - (chartData.length - 1 - i) * 86400000).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })}
                 </text>
               ))}
