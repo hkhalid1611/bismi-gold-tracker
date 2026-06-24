@@ -77,7 +77,7 @@ export default function App() {
         const gramPrice = data.price / 31.1035;
         setSpotPrice({
           gram: gramPrice,
-          ounce: data.price
+          ounce: data.price * 31.1035
         });
         
         if (previousPrice) {
