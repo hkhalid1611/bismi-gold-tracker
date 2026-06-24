@@ -167,11 +167,57 @@ body {
   text-align: center;
 }
 
-/* Gold Bar Prices */
+/* Gold Bar Prices - ENHANCED CARD LAYOUT */
 .bar-prices-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.bar-price-card {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  background: linear-gradient(135deg, var(--tertiary-bg) 0%, var(--secondary-bg) 100%);
+  padding: 20px;
+  border-radius: 12px;
+  border: 2px solid var(--accent-gold);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+}
+
+.bar-price-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(212, 175, 55, 0.4);
+  border-color: var(--accent-gold-light);
+}
+
+.card-weight {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  text-align: center;
+}
+
+.card-price {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--primary-bg);
+  text-align: center;
+  background-color: var(--accent-gold);
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.card-markup {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--accent-gold);
+  text-align: center;
+  background-color: rgba(212, 175, 55, 0.1);
+  padding: 8px;
+  border-radius: 6px;
 }
 
 .bar-price-row {
@@ -458,7 +504,40 @@ body {
   color: var(--negative);
 }
 
-/* Volatility Meter */
+/* Volatility Meter - ENHANCED WITH COLORS */
+.volatility-meter {
+  border: 2px solid var(--accent-gold);
+}
+
+.meter-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.meter-bar {
+  width: 100%;
+  height: 30px;
+  background-color: var(--secondary-bg);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid var(--border-color);
+}
+
+.meter-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--positive) 0%, var(--accent-gold) 50%, var(--negative) 100%);
+  transition: width 0.3s ease, background-color 0.3s ease;
+  border-radius: 6px;
+}
+
+.meter-value {
+  font-size: 18px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--accent-gold);
+}
+
 .volatility-display {
   background-color: var(--tertiary-bg);
   padding: 15px;
@@ -558,6 +637,40 @@ body {
   border-color: var(--accent-gold);
 }
 
+.chart-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.chart-btn {
+  padding: 10px 18px;
+  background-color: var(--tertiary-bg);
+  color: var(--text-secondary);
+  border: 2px solid var(--border-color);
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.chart-btn:hover {
+  background-color: var(--secondary-bg);
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
+.chart-btn.active {
+  background-color: var(--accent-gold);
+  color: var(--primary-bg);
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+}
+
 .chart-container {
   background-color: var(--tertiary-bg);
   border: 1px solid var(--border-color);
@@ -567,6 +680,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  position: relative;
 }
 
 .chart-display {
@@ -577,6 +691,66 @@ body {
   width: 100%;
   height: auto;
   min-height: 300px;
+}
+
+.chart-tooltip {
+  position: absolute;
+  background-color: var(--secondary-bg);
+  border: 2px solid var(--accent-gold);
+  border-radius: 8px;
+  padding: 12px 16px;
+  color: var(--text-primary);
+  font-size: 12px;
+  z-index: 10;
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+  pointer-events: none;
+}
+
+.tooltip-date {
+  font-weight: 700;
+  color: var(--accent-gold);
+  margin-bottom: 4px;
+}
+
+.tooltip-time {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.tooltip-price {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent-gold);
+}
+
+.chart-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.stat {
+  background-color: var(--tertiary-bg);
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  text-align: center;
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.stat-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent-gold);
 }
 
 .chart-info {
@@ -612,6 +786,72 @@ body {
   text-align: center;
   color: var(--text-secondary);
   padding: 40px 20px;
+}
+
+/* Market Prediction Section */
+.market-prediction {
+  border: 2px solid var(--accent-gold);
+}
+
+.prediction-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.prediction-card {
+  background: linear-gradient(135deg, var(--tertiary-bg) 0%, var(--secondary-bg) 100%);
+  border: 2px solid var(--accent-gold);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+}
+
+.prediction-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 12px;
+}
+
+.prediction-direction {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
+}
+
+.prediction-price {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  margin-bottom: 8px;
+}
+
+.prediction-change {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.prediction-analysis {
+  background-color: var(--tertiary-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 15px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text-secondary);
+}
+
+.prediction-analysis p {
+  margin: 0;
+}
+
+.prediction-analysis strong {
+  color: var(--accent-gold);
 }
 
 /* Footer */
@@ -671,6 +911,22 @@ body {
   .input-group select,
   .input-group input {
     font-size: 16px;
+  }
+
+  .bar-prices-list {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+
+  .card-weight {
+    font-size: 18px;
+  }
+
+  .card-price {
+    font-size: 22px;
+  }
+
+  .prediction-grid {
+    grid-template-columns: 1fr;
   }
 }
 

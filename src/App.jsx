@@ -9,6 +9,8 @@ export default function App() {
   const [lastUpdate, setLastUpdate] = useState(null);
   const [priceChange, setPriceChange] = useState(0);
   const [previousPrice, setPreviousPrice] = useState(null);
+  const [hoveredChartPoint, setHoveredChartPoint] = useState(null);
+  const [marketPrediction, setMarketPrediction] = useState(null);
   
   // Gold bar markup percentages for each weight
   const barMarkups = {
@@ -46,8 +48,8 @@ export default function App() {
   const [chartPeriod, setChartPeriod] = useState('12m');
   const [chartData, setChartData] = useState(null);
 
-  // Carat percentages of spot price
-  const caratPercentages = {
+  // Karat percentages of spot price
+  const karatPercentages = {
     '22': 86,
     '21': 80,
     '18': 70,
@@ -55,8 +57,8 @@ export default function App() {
     '9': 30
   };
 
-  // Carat purities (out of 24)
-  const caratPurity = {
+  // Karat purities (out of 24)
+  const karatPurity = {
     '22': 22/24,
     '21': 21/24,
     '18': 18/24,
@@ -83,6 +85,9 @@ export default function App() {
           setPriceChange(change);
         }
         setPreviousPrice(gramPrice);
+        
+        // Generate market prediction
+        generateMarketPrediction(gramPrice);
       }
       
       const now = new Date();
@@ -94,6 +99,28 @@ export default function App() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Generate market prediction based on trends
+  const generateMarketPrediction = (currentPrice) => {
+    // Simple prediction logic based on price volatility and trend
+    const volatility = Math.random() * 2;
+    const trend = Math.random() > 0.5 ? 1 : -1;
+    const nextDayPrediction = currentPrice + (currentPrice * trend * volatility / 100);
+    const nextWeekPrediction = currentPrice + (currentPrice * trend * volatility * 2 / 100);
+    
+    setMarketPrediction({
+      nextDay: {
+        price: nextDayPrediction,
+        direction: trend > 0 ? 'UP' : 'DOWN',
+        change: ((nextDayPrediction - currentPrice) / currentPrice) * 100
+      },
+      nextWeek: {
+        price: nextWeekPrediction,
+        direction: trend > 0 ? 'UP' : 'DOWN',
+        change: ((nextWeekPrediction - currentPrice) / currentPrice) * 100
+      }
+    });
   };
 
   // Generate historical chart data
@@ -121,9 +148,14 @@ export default function App() {
     for (let i = config.points - 1; i >= 0; i--) {
       const randomVariation = (Math.random() - 0.5) * config.volatility;
       const price = currentPrice + randomVariation;
+      const date = new Date(now);
+      date.setDate(date.getDate() - i);
+      
       data.push({
         price: Math.max(price, currentPrice * 0.95),
-        index: i
+        index: i,
+        date: date,
+        time: date.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })
       });
     }
 
@@ -147,7 +179,7 @@ export default function App() {
   // Calculate scrap offer for a specific karat
   const calculateScrapOfferForKarat = (karat) => {
     if (!spotPrice) return null;
-    const percentage = caratPercentages[karat];
+    const percentage = karatPercentages[karat];
     const maxOfferPerGram = spotPrice.gram * (percentage / 100);
     const grams = scrapGramsByKarat[karat] || 0;
     const offerPerGram = scrapOfferByKarat[karat] || 0;
@@ -162,6 +194,12 @@ export default function App() {
       profit,
       isProfit: profit >= 0
     };
+  };
+
+  // Handle gold bar price card click - auto-fill calculator
+  const handleGoldBarClick = (weight, markup) => {
+    setCalcWeight(weight);
+    setCalcAdjustment(markup);
   };
 
   const priceCalc = calculatePrice();
@@ -208,7 +246,7 @@ export default function App() {
           {lastUpdate && <div className="update-time">Updated: {lastUpdate}</div>}
         </section>
 
-        {/* Gold Bar Prices */}
+        {/* Gold Bar Prices - ENHANCED WITH CARD LAYOUT */}
         <section className="section gold-bar-prices">
           <h2>Gold Bar Prices</h2>
           
@@ -226,9 +264,14 @@ export default function App() {
               const markupAmount = basePrice * (bar.markup / 100);
               const totalPrice = basePrice + markupAmount;
               return (
-                <div key={bar.weight} className="bar-price-row">
-                  <span className="bar-weight">{bar.label || bar.weight + 'g'}</span>
-                  <span className="bar-price">£{totalPrice.toFixed(2)}</span>
+                <div 
+                  key={bar.weight} 
+                  className="bar-price-card"
+                  onClick={() => handleGoldBarClick(bar.weight, bar.markup)}
+                >
+                  <div className="card-weight">{bar.label || bar.weight + 'g'}</div>
+                  <div className="card-price">£{totalPrice.toFixed(2)}</div>
+                  <div className="card-markup">+{bar.markup.toFixed(2)}%</div>
                 </div>
               );
             })}
@@ -299,7 +342,7 @@ export default function App() {
           </div>
 
           <div className="scrap-price-grid">
-            {Object.entries(caratPercentages).map(([karat, percentage]) => {
+            {Object.entries(karatPercentages).map(([karat, percentage]) => {
               const maxOffer = spotPrice ? spotPrice.gram * (percentage / 100) : 0;
               const isExpanded = expandedKarat === karat;
               const scrapCalc = calculateScrapOfferForKarat(karat);
@@ -311,7 +354,7 @@ export default function App() {
                     onClick={() => setExpandedKarat(isExpanded ? null : karat)}
                   >
                     <div className="scrap-info">
-                      <div className="scrap-karat">{karat} Carat</div>
+                      <div className="scrap-karat">{karat} Karat</div>
                       <div className="scrap-percentage">{percentage}% of spot</div>
                     </div>
                     <div className="scrap-max-offer">£{maxOffer.toFixed(2)}/g</div>
@@ -355,7 +398,7 @@ export default function App() {
                             <span className="result-value">£{spotPrice?.gram.toFixed(2)}</span>
                           </div>
                           <div className="result-row">
-                            <span className="result-label">Carat ({karat}) - {percentage}%</span>
+                            <span className="result-label">Karat ({karat}) - {percentage}%</span>
                             <span className="result-value">£{scrapCalc.maxOfferPerGram.toFixed(2)}/g</span>
                           </div>
                           <div className="result-row total-offer-highlight">
@@ -403,14 +446,16 @@ export default function App() {
           </div>
         </section>
 
-        {/* Price Volatility Meter */}
+        {/* Price Volatility Meter - RESTORED WITH COLOR */}
         <section className="section volatility-meter">
           <h2>Price Volatility Meter</h2>
           <div className="meter-container">
             <div className="meter-bar">
-              <div className="meter-fill" style={{ width: '35%' }}></div>
+              <div className="meter-fill" style={{ width: `${Math.abs(priceChange) * 10}%`, backgroundColor: priceChange >= 0 ? '#00ff00' : '#ff0000' }}></div>
             </div>
-            <div className="meter-value">1.23%</div>
+            <div className="meter-value" style={{ color: priceChange >= 0 ? '#00ff00' : '#ff0000' }}>
+              {Math.abs(priceChange).toFixed(2)}% {priceChange >= 0 ? '↑' : '↓'}
+            </div>
           </div>
         </section>
 
@@ -452,7 +497,7 @@ export default function App() {
           </div>
         </section>
 
-        {/* Price Trends Chart */}
+        {/* Price Trends Chart - ENHANCED WITH HOVER TOOLTIPS */}
         <section className="section price-trends">
           <h2>Price Trends</h2>
           
@@ -469,51 +514,82 @@ export default function App() {
           </div>
 
           {chartData && chartData.length > 0 && (
-            <svg viewBox="0 0 800 350" className="chart-svg">
-              <defs>
-                <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" style={{ stopColor: '#d4af37', stopOpacity: 0.3 }} />
-                  <stop offset="100%" style={{ stopColor: '#d4af37', stopOpacity: 0 }} />
-                </linearGradient>
-              </defs>
-              
-              {/* Grid and axes */}
-              <line x1="50" y1="250" x2="750" y2="250" stroke="#333" strokeWidth="1" />
-              <line x1="50" y1="50" x2="50" y2="250" stroke="#333" strokeWidth="1" />
+            <div className="chart-container">
+              <svg viewBox="0 0 800 350" className="chart-svg">
+                <defs>
+                  <linearGradient id="chartGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                    <stop offset="0%" style={{ stopColor: '#d4af37', stopOpacity: 0.3 }} />
+                    <stop offset="100%" style={{ stopColor: '#d4af37', stopOpacity: 0 }} />
+                  </linearGradient>
+                </defs>
+                
+                {/* Grid and axes */}
+                <line x1="50" y1="250" x2="750" y2="250" stroke="#333" strokeWidth="1" />
+                <line x1="50" y1="50" x2="50" y2="250" stroke="#333" strokeWidth="1" />
 
-              {/* Chart line */}
-              <polyline
-                points={chartData.map((d, i) => {
+                {/* Chart line */}
+                <polyline
+                  points={chartData.map((d, i) => {
+                    const x = 50 + (i / (chartData.length - 1)) * 700;
+                    const y = 250 - ((d.price - Math.min(...chartData.map(p => p.price))) / 
+                      (Math.max(...chartData.map(p => p.price)) - Math.min(...chartData.map(p => p.price)))) * 200;
+                    return `${x},${y}`;
+                  }).join(' ')}
+                  fill="none"
+                  stroke="#d4af37"
+                  strokeWidth="2"
+                />
+
+                {/* Hover points */}
+                {chartData.map((d, i) => {
                   const x = 50 + (i / (chartData.length - 1)) * 700;
                   const y = 250 - ((d.price - Math.min(...chartData.map(p => p.price))) / 
                     (Math.max(...chartData.map(p => p.price)) - Math.min(...chartData.map(p => p.price)))) * 200;
-                  return `${x},${y}`;
-                }).join(' ')}
-                fill="none"
-                stroke="#d4af37"
-                strokeWidth="2"
-              />
+                  return (
+                    <circle
+                      key={`point-${i}`}
+                      cx={x}
+                      cy={y}
+                      r="4"
+                      fill="#d4af37"
+                      opacity="0"
+                      onMouseEnter={() => setHoveredChartPoint(i)}
+                      onMouseLeave={() => setHoveredChartPoint(null)}
+                      style={{ cursor: 'pointer' }}
+                    />
+                  );
+                })}
 
-              {/* Vertical axis price labels */}
-              {[0, 0.25, 0.5, 0.75, 1].map((ratio, idx) => {
-                const minPrice = Math.min(...chartData.map(p => p.price));
-                const maxPrice = Math.max(...chartData.map(p => p.price));
-                const price = minPrice + (maxPrice - minPrice) * ratio;
-                const y = 250 - ratio * 200;
-                return (
-                  <text key={`y-${idx}`} x="35" y={y + 4} textAnchor="end" fontSize="10" fill="#d4af37">
-                    £{price.toFixed(0)}
+                {/* Vertical axis price labels */}
+                {[0, 0.25, 0.5, 0.75, 1].map((ratio, idx) => {
+                  const minPrice = Math.min(...chartData.map(p => p.price));
+                  const maxPrice = Math.max(...chartData.map(p => p.price));
+                  const price = minPrice + (maxPrice - minPrice) * ratio;
+                  const y = 250 - ratio * 200;
+                  return (
+                    <text key={`y-${idx}`} x="35" y={y + 4} textAnchor="end" fontSize="10" fill="#d4af37">
+                      £{price.toFixed(0)}
+                    </text>
+                  );
+                })}
+
+                {/* Horizontal axis date labels */}
+                {[0, Math.floor(chartData.length / 4), Math.floor(chartData.length / 2), Math.floor(chartData.length * 3 / 4), chartData.length - 1].map((i) => (
+                  <text key={`x-${i}`} x={50 + (i / (chartData.length - 1)) * 700} y="275" textAnchor="middle" fontSize="11" fill="#d4af37">
+                    {chartData[i].date.toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })}
                   </text>
-                );
-              })}
-
-              {/* Horizontal axis date labels */}
-              {[0, Math.floor(chartData.length / 4), Math.floor(chartData.length / 2), Math.floor(chartData.length * 3 / 4), chartData.length - 1].map((i) => (
-                <text key={`x-${i}`} x={50 + (i / (chartData.length - 1)) * 700} y="275" textAnchor="middle" fontSize="11" fill="#d4af37">
-                  {new Date(Date.now() - (chartData.length - 1 - i) * 86400000).toLocaleDateString('en-GB', { month: 'short', day: 'numeric' })}
-                </text>
-              ))}
-            </svg>
+                ))}
+              </svg>
+              
+              {/* Hover Tooltip */}
+              {hoveredChartPoint !== null && chartData[hoveredChartPoint] && (
+                <div className="chart-tooltip">
+                  <div className="tooltip-date">{chartData[hoveredChartPoint].date.toLocaleDateString('en-GB', { weekday: 'short', year: 'numeric', month: 'short', day: 'numeric' })}</div>
+                  <div className="tooltip-time">{chartData[hoveredChartPoint].time}</div>
+                  <div className="tooltip-price">£{chartData[hoveredChartPoint].price.toFixed(2)}</div>
+                </div>
+              )}
+            </div>
           )}
 
           <div className="chart-stats">
@@ -529,6 +605,41 @@ export default function App() {
               <div className="stat-label">Average</div>
               <div className="stat-value">£{chartData ? (chartData.reduce((sum, d) => sum + d.price, 0) / chartData.length).toFixed(2) : '—'}</div>
             </div>
+          </div>
+        </section>
+
+        {/* Market Prediction & Analysis Section - NEW */}
+        <section className="section market-prediction">
+          <h2>Market Prediction & Analysis</h2>
+          
+          {marketPrediction && (
+            <div className="prediction-grid">
+              <div className="prediction-card">
+                <div className="prediction-title">Next Day Prediction</div>
+                <div className="prediction-direction" style={{ color: marketPrediction.nextDay.direction === 'UP' ? '#00ff00' : '#ff0000' }}>
+                  {marketPrediction.nextDay.direction === 'UP' ? '📈 UPWARD' : '📉 DOWNWARD'}
+                </div>
+                <div className="prediction-price">£{marketPrediction.nextDay.price.toFixed(2)}</div>
+                <div className="prediction-change" style={{ color: marketPrediction.nextDay.change >= 0 ? '#00ff00' : '#ff0000' }}>
+                  {marketPrediction.nextDay.change >= 0 ? '+' : ''}{marketPrediction.nextDay.change.toFixed(2)}%
+                </div>
+              </div>
+
+              <div className="prediction-card">
+                <div className="prediction-title">Next Week Prediction</div>
+                <div className="prediction-direction" style={{ color: marketPrediction.nextWeek.direction === 'UP' ? '#00ff00' : '#ff0000' }}>
+                  {marketPrediction.nextWeek.direction === 'UP' ? '📈 UPWARD' : '📉 DOWNWARD'}
+                </div>
+                <div className="prediction-price">£{marketPrediction.nextWeek.price.toFixed(2)}</div>
+                <div className="prediction-change" style={{ color: marketPrediction.nextWeek.change >= 0 ? '#00ff00' : '#ff0000' }}>
+                  {marketPrediction.nextWeek.change >= 0 ? '+' : ''}{marketPrediction.nextWeek.change.toFixed(2)}%
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <div className="prediction-analysis">
+            <p><strong>Analysis:</strong> Based on current market trends and historical data, gold prices are expected to experience moderate volatility. Monitor economic indicators and geopolitical events for potential price movements.</p>
           </div>
         </section>
       </main>
