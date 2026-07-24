@@ -141,6 +141,12 @@ export default function App() {
     return data;
   };
 
+  // Auto-update adjustment percentage when weight changes
+  useEffect(() => {
+    const newAdjustment = barMarkups[calcWeight] || 5.72;
+    setCalcAdjustment(newAdjustment);
+  }, [calcWeight]);
+
   useEffect(() => {
     fetchGoldPrice();
     const interval = setInterval(fetchGoldPrice, 60000);
@@ -255,7 +261,13 @@ export default function App() {
           <div className="calc-inputs">
             <div className="input-group">
               <label>Weight</label>
-              <select value={calcWeight} onChange={(e) => setCalcWeight(parseFloat(e.target.value))}>
+              <select value={calcWeight} onChange={(e) => {
+                const weight = parseFloat(e.target.value);
+                setCalcWeight(weight);
+                // Auto-update adjustment to match the bar markup
+                const newAdjustment = barMarkups[weight] || 5.72;
+                setCalcAdjustment(newAdjustment);
+              }}>
                 <option value={100}>100 gram</option>
                 <option value={50}>50 gram</option>
                 <option value={31.1035}>1 ounce</option>
