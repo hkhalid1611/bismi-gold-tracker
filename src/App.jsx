@@ -203,22 +203,17 @@ export default function App() {
           <h1 className="logo">BISMI</h1>
           <p className="tagline">Jeweller for generations</p>
         </div>
-        <div className="volatility-meter">
-          <div className={`volatility-bar ${priceChange > 0 ? 'up' : priceChange < 0 ? 'down' : 'neutral'}`}>
-            <span className="volatility-arrow">{priceChange > 0 ? '📈' : priceChange < 0 ? '📉' : '→'}</span>
-            <span className="volatility-percent">{Math.abs(priceChange).toFixed(2)}%</span>
-          </div>
-        </div>
-        <div className="unit-toggle">
-          <button className={priceUnit === 'gram' ? 'active' : ''} onClick={() => setPriceUnit('gram')}>PER GRAM</button>
-          <button className={priceUnit === 'ounce' ? 'active' : ''} onClick={() => setPriceUnit('ounce')}>PER OUNCE</button>
-        </div>
       </header>
 
       <main className="container">
         {/* Live Gold Spot Price */}
         <section className="section spot-price">
           <h2>Live Gold Spot Price</h2>
+          
+          <div className="unit-toggle">
+            <button className={priceUnit === 'gram' ? 'active' : ''} onClick={() => setPriceUnit('gram')}>PER GRAM</button>
+            <button className={priceUnit === 'ounce' ? 'active' : ''} onClick={() => setPriceUnit('ounce')}>PER OUNCE</button>
+          </div>
           
           <div className="spot-price-display">
             <div className="spot-price-value">£{spotPrice ? (priceUnit === 'gram' ? spotPrice.gram.toFixed(2) : spotPrice.ounce.toFixed(2)) : '—'}</div>
