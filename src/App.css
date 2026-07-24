@@ -55,12 +55,7 @@ body {
   justify-content: space-between;
   align-items: center;
   gap: 20px;
-}
-
-.logo-section {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+  flex-wrap: wrap;
 }
 
 .logo {
@@ -81,12 +76,12 @@ body {
   margin: 0;
 }
 
-.unit-toggle-inline {
+.unit-toggle {
   display: flex;
   gap: 10px;
 }
 
-.unit-toggle-inline button {
+.unit-toggle button {
   padding: 8px 16px;
   background-color: var(--tertiary-bg);
   color: var(--text-secondary);
@@ -100,15 +95,62 @@ body {
   font-weight: 600;
 }
 
-.unit-toggle-inline button:hover {
+.unit-toggle button:hover {
   border-color: var(--accent-gold);
   color: var(--accent-gold);
 }
 
-.unit-toggle-inline button.active {
+.unit-toggle button.active {
   background-color: var(--accent-gold);
   color: var(--primary-bg);
   border-color: var(--accent-gold);
+}
+
+/* Volatility Meter */
+.volatility-meter {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.volatility-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  font-size: 14px;
+  transition: all 0.3s ease;
+  min-width: 100px;
+  justify-content: center;
+}
+
+.volatility-bar.up {
+  background: linear-gradient(135deg, #4caf50 0%, #45a049 100%);
+  color: #ffffff;
+  box-shadow: 0 0 15px rgba(76, 175, 80, 0.4);
+}
+
+.volatility-bar.down {
+  background: linear-gradient(135deg, #f44336 0%, #da190b 100%);
+  color: #ffffff;
+  box-shadow: 0 0 15px rgba(244, 67, 54, 0.4);
+}
+
+.volatility-bar.neutral {
+  background: linear-gradient(135deg, #d4af37 0%, #c9a961 100%);
+  color: #0a0a0a;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+}
+
+.volatility-arrow {
+  font-size: 18px;
+}
+
+.volatility-percent {
+  font-size: 14px;
+  font-weight: 700;
 }
 
 /* Container */
@@ -143,17 +185,6 @@ body {
   border: 2px solid var(--accent-gold);
 }
 
-.spot-price-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
-}
-
-.spot-price-header h2 {
-  margin-bottom: 0;
-}
-
 .spot-price-display {
   background-color: var(--tertiary-bg);
   border: 1px solid var(--accent-gold);
@@ -184,19 +215,14 @@ body {
   text-align: center;
 }
 
-/* Gold Bar Prices - EXPANDABLE CARDS */
+/* Gold Bar Prices */
 .bar-prices-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 12px;
 }
 
-.bar-price-card-wrapper {
-  display: flex;
-  flex-direction: column;
-}
-
-.bar-price-card {
+.bar-price-row {
   display: grid;
   grid-template-columns: 1fr auto;
   gap: 15px;
@@ -205,56 +231,27 @@ body {
   padding: 12px 15px;
   border-radius: 6px;
   border: 1px solid var(--border-color);
-  cursor: pointer;
-  transition: all 0.3s ease;
 }
 
-.bar-price-card:hover {
-  border-color: var(--accent-gold);
-  background-color: rgba(212, 175, 55, 0.05);
-}
-
-.card-weight {
+.weight-label {
   font-size: 14px;
   font-weight: 600;
-  color: #ffffff;
+  color: var(--text-primary);
 }
 
-.card-price {
+.bar-price {
   font-size: 14px;
   font-weight: 600;
   color: var(--accent-gold);
   text-align: right;
 }
 
-/* Expandable Calculator Content */
-.bar-card-expanded {
-  background-color: var(--tertiary-bg);
-  border: 1px solid var(--accent-gold);
-  border-top: none;
-  border-radius: 0 0 6px 6px;
-  padding: 15px;
-  margin-top: -1px;
-  animation: slideDown 0.3s ease;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Inputs and Forms */
+/* Price Calculator */
 .calc-inputs {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
   gap: 15px;
-  margin-bottom: 15px;
+  margin-bottom: 20px;
 }
 
 .input-group {
@@ -265,43 +262,35 @@ body {
 
 .input-group label {
   font-size: 12px;
-  font-weight: 600;
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  font-weight: 600;
 }
 
-.input-group input,
-.input-group select {
-  background-color: var(--secondary-bg);
+.input-group select,
+.input-group input {
+  padding: 10px 12px;
+  background-color: var(--tertiary-bg);
   border: 1px solid var(--border-color);
   border-radius: 4px;
-  padding: 10px;
   color: var(--text-primary);
   font-size: 14px;
-  transition: all 0.3s ease;
+  font-family: inherit;
 }
 
-.input-group input:focus,
-.input-group select:focus {
+.input-group select:focus,
+.input-group input:focus {
   outline: none;
   border-color: var(--accent-gold);
-  box-shadow: 0 0 8px rgba(212, 175, 55, 0.2);
-}
-
-.input-group input::placeholder {
-  color: var(--text-muted);
+  box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.2);
 }
 
 /* Calculator Results */
 .calc-results {
-  background-color: var(--secondary-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 12px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .result-row {
@@ -309,352 +298,52 @@ body {
   grid-template-columns: 1fr auto;
   gap: 15px;
   align-items: center;
-  padding: 8px 0;
-  border-bottom: 1px solid var(--border-color);
-  font-size: 13px;
-}
-
-.result-row:last-child {
-  border-bottom: none;
+  background-color: var(--tertiary-bg);
+  padding: 12px 15px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
 }
 
 .result-label {
+  font-size: 13px;
   color: var(--text-secondary);
-  font-weight: 500;
 }
 
 .result-value {
-  color: var(--accent-gold);
+  font-size: 14px;
   font-weight: 600;
+  color: var(--text-primary);
   text-align: right;
 }
 
+/* Highlighted Total Price */
 .total-price-highlight {
-  background-color: rgba(212, 175, 55, 0.1);
-  padding: 10px;
-  border-radius: 4px;
-  border: 1px solid var(--accent-gold);
-  border-bottom: 1px solid var(--accent-gold) !important;
-  margin-top: 5px;
+  background: linear-gradient(135deg, var(--highlight-gold) 0%, var(--accent-gold) 100%);
+  border: 2px solid var(--accent-gold);
+  padding: 18px 15px;
+}
+
+.total-price-highlight .result-label {
+  color: var(--primary-bg);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
 .total-price-value {
-  font-size: 16px;
-  color: var(--accent-gold);
+  font-size: 28px !important;
+  font-weight: 700 !important;
+  color: var(--primary-bg) !important;
 }
 
-/* Price Change Indicators */
-.price-indicators {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 15px;
-}
-
-.indicators-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 15px;
-}
-
-.indicator {
-  background-color: var(--tertiary-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 15px;
-  text-align: center;
-}
-
-.indicator-label {
-  font-size: 12px;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 8px;
-}
-
-.indicator-value {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--accent-gold);
-}
-
-.indicator-value.positive {
-  color: #00ff00;
-}
-
-.indicator-value.negative {
-  color: #ff0000;
-}
-
-/* Volatility Meter */
-.volatility-meter {
-  border: 1px solid var(--accent-gold);
-}
-
-.meter-container {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-.meter-bar {
-  background-color: var(--tertiary-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  height: 30px;
-  overflow: hidden;
-}
-
-.meter-fill {
-  height: 100%;
-  transition: width 0.5s ease, background-color 0.3s ease;
-  border-radius: 8px;
-}
-
-.meter-value {
-  font-size: 18px;
-  font-weight: 700;
-  text-align: center;
-}
-
-/* Year-over-Year Comparison */
-.comparison-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 15px;
-}
-
-.comparison-item {
-  background-color: var(--tertiary-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 15px;
-  text-align: center;
-}
-
-.comparison-label {
-  font-size: 12px;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 8px;
-}
-
-.comparison-value {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--accent-gold);
-}
-
-.comparison-value.positive {
-  color: #00ff00;
-}
-
-/* Trend Analysis */
-.trend-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 15px;
-}
-
-.trend-item {
-  background-color: var(--tertiary-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 15px;
-  text-align: center;
-}
-
-.trend-label {
-  font-size: 12px;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 8px;
-}
-
-.trend-value {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--accent-gold);
-}
-
-.trend-value.positive {
-  color: #00ff00;
-}
-
-/* Price Trends Chart */
-.chart-controls {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 20px;
-  flex-wrap: wrap;
-}
-
-.chart-btn {
-  padding: 8px 14px;
-  background-color: var(--tertiary-bg);
-  color: var(--text-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 12px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.chart-btn:hover {
-  border-color: var(--accent-gold);
-  color: var(--accent-gold);
-}
-
-.chart-btn.active {
-  background-color: var(--accent-gold);
-  color: var(--primary-bg);
-  border-color: var(--accent-gold);
-  box-shadow: 0 0 12px rgba(212, 175, 55, 0.4);
-}
-
-.chart-container {
-  background-color: var(--tertiary-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 15px;
-  margin-bottom: 15px;
-  position: relative;
-}
-
-.chart-svg {
-  width: 100%;
-  height: auto;
-  min-height: 350px;
-}
-
-.chart-tooltip {
-  position: absolute;
-  background-color: var(--secondary-bg);
-  border: 1px solid var(--accent-gold);
-  border-radius: 6px;
-  padding: 12px;
-  font-size: 12px;
-  z-index: 10;
-  pointer-events: none;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
-}
-
-.tooltip-date {
-  color: var(--text-secondary);
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.tooltip-time {
-  color: var(--text-muted);
-  font-size: 11px;
-  margin-bottom: 6px;
-}
-
-.tooltip-price {
-  color: var(--accent-gold);
-  font-weight: 700;
-  font-size: 14px;
-}
-
-.chart-stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
-  gap: 15px;
-}
-
-.stat {
-  background-color: var(--tertiary-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 12px;
-  text-align: center;
-}
-
-.stat-label {
-  font-size: 11px;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 6px;
-}
-
-.stat-value {
-  font-size: 16px;
-  font-weight: 700;
-  color: var(--accent-gold);
-}
-
-/* Market Prediction */
-.prediction-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 15px;
-  margin-bottom: 15px;
-}
-
-.prediction-card {
-  background-color: var(--tertiary-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 15px;
-  text-align: center;
-}
-
-.prediction-title {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin-bottom: 10px;
-}
-
-.prediction-direction {
-  font-size: 14px;
-  font-weight: 700;
-  margin-bottom: 8px;
-}
-
-.prediction-price {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--accent-gold);
-  margin-bottom: 8px;
-}
-
-.prediction-change {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.prediction-analysis {
-  background-color: var(--tertiary-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 15px;
-}
-
-.prediction-analysis p {
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--text-secondary);
-  margin: 0;
-}
-
-/* Scrap Price Section */
+/* Scrap Price */
 .current-spot-highlight {
   background-color: var(--tertiary-bg);
-  border: 1px solid var(--accent-gold);
+  border: 2px solid var(--accent-gold);
   border-radius: 6px;
   padding: 15px;
-  text-align: center;
   margin-bottom: 15px;
+  text-align: center;
 }
 
 .spot-label {
@@ -666,7 +355,8 @@ body {
 }
 
 .spot-value {
-  font-size: 20px;
+  font-family: 'Playfair Display', serif;
+  font-size: 32px;
   font-weight: 700;
   color: var(--accent-gold);
 }
@@ -674,13 +364,427 @@ body {
 .per-gram {
   font-size: 12px;
   color: var(--text-secondary);
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .scrap-price-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.scrap-price-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: 1fr auto;
+  gap: 15px;
+  align-items: center;
+  background-color: var(--tertiary-bg);
+  padding: 12px 15px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.scrap-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.scrap-karat {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.scrap-percentage {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.scrap-max-offer {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--accent-gold);
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Scrap Offer Calculator */
+.max-offer-helper {
+  font-size: 11px;
+  color: var(--accent-gold);
+  margin-top: 4px;
+  font-weight: 600;
+}
+
+.scrap-results {
+  display: flex;
+  flex-direction: column;
   gap: 12px;
+}
+
+/* Highlighted Total Offer Price */
+.total-offer-highlight {
+  background: linear-gradient(135deg, var(--highlight-gold) 0%, var(--accent-gold) 100%);
+  border: 2px solid var(--accent-gold);
+  padding: 18px 15px;
+}
+
+.total-offer-highlight .result-label {
+  color: var(--primary-bg);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.total-offer-value {
+  font-size: 28px !important;
+  font-weight: 700 !important;
+  color: var(--primary-bg) !important;
+}
+
+.result-row.profit-loss {
+  border-top: 1px solid var(--accent-gold);
+  padding-top: 10px;
+  margin-top: 5px;
+}
+
+.result-row.profit-loss.profit .result-value {
+  color: var(--positive);
+  font-weight: 700;
+}
+
+.result-row.profit-loss.loss .result-value {
+  color: var(--negative);
+  font-weight: 700;
+}
+
+.result-row.profit-loss.profit .result-label {
+  color: var(--positive);
+  font-weight: 700;
+}
+
+.result-row.profit-loss.loss .result-label {
+  color: var(--negative);
+  font-weight: 700;
+}
+
+/* Price Indicators */
+.indicators-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.indicator {
+  background-color: var(--tertiary-bg);
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  text-align: center;
+}
+
+.indicator-label {
+  font-size: 11px;
+  color: var(--accent-gold);
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.indicator-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.indicator-value.positive {
+  color: var(--positive);
+}
+
+.indicator-value.negative {
+  color: var(--negative);
+}
+
+/* Volatility Meter */
+.volatility-display {
+  background-color: var(--tertiary-bg);
+  padding: 15px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+}
+
+.volatility-bar {
+  width: 100%;
+  height: 20px;
+  background-color: var(--secondary-bg);
+  border-radius: 4px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  border: 1px solid var(--border-color);
+}
+
+.volatility-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--positive) 0%, var(--accent-gold) 50%, var(--negative) 100%);
+  transition: width 0.3s ease;
+}
+
+.volatility-label {
+  font-size: 13px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+/* Comparison Grid */
+.comparison-grid,
+.trend-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.comparison-item,
+.trend-item {
+  background-color: var(--tertiary-bg);
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  text-align: center;
+}
+
+.comparison-label,
+.trend-label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 6px;
+}
+
+.comparison-value,
+.trend-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.comparison-value.positive,
+.trend-value.positive {
+  color: var(--positive);
+}
+
+/* Price Trends Chart */
+.chart-period-selector {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.period-btn {
+  padding: 8px 16px;
+  background-color: var(--tertiary-bg);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.period-btn:hover {
+  background-color: var(--secondary-bg);
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
+.period-btn.active {
+  background-color: var(--accent-gold);
+  color: var(--primary-bg);
+  border-color: var(--accent-gold);
+}
+
+.chart-container {
+  background-color: var(--tertiary-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 20px;
+  min-height: 400px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-display {
+  width: 100%;
+}
+
+.chart-svg {
+  width: 100%;
+  height: auto;
+  min-height: 300px;
+}
+
+.chart-info {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 15px;
+  margin-top: 20px;
+  padding-top: 15px;
+  border-top: 1px solid var(--border-color);
+}
+
+.info-item {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  text-align: center;
+}
+
+.info-label {
+  font-size: 12px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.info-value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent-gold);
+}
+
+.chart-placeholder {
+  text-align: center;
+  color: var(--text-secondary);
+  padding: 40px 20px;
+}
+
+/* Footer */
+.footer {
+  background-color: var(--secondary-bg);
+  border-top: 1px solid var(--border-color);
+  padding: 20px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .logo {
+    font-size: 24px;
+  }
+
+  .tagline {
+    font-size: 11px;
+  }
+
+  .spot-price-value {
+    font-size: 36px;
+  }
+
+  .total-price-value {
+    font-size: 24px !important;
+  }
+
+  .total-offer-value {
+    font-size: 24px !important;
+  }
+
+  .calc-inputs {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-period-selector {
+    justify-content: center;
+  }
+
+  .period-btn {
+    font-size: 11px;
+    padding: 6px 12px;
+  }
+
+  .chart-info {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-container {
+    padding: 15px;
+    min-height: 350px;
+  }
+
+  .input-group select,
+  .input-group input {
+    font-size: 16px;
+  }
+}
+
+/* Section Header with Icon */
+.section-header-with-icon {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+
+.section-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+}
+
+/* Spot Price Header */
+.spot-price-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+  flex-wrap: wrap;
+}
+
+.spot-price-header h2 {
+  margin: 0;
+}
+
+.unit-toggle-inline {
+  display: flex;
+  gap: 8px;
+}
+
+.unit-toggle-inline button {
+  padding: 6px 12px;
+  background-color: var(--tertiary-bg);
+  color: var(--text-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+.unit-toggle-inline button:hover {
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
+.unit-toggle-inline button.active {
+  background-color: var(--accent-gold);
+  color: var(--primary-bg);
+  border-color: var(--accent-gold);
+}
+
+/* Scrap Price Accordion */
+.scrap-price-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .scrap-accordion-item {
@@ -697,186 +801,83 @@ body {
   align-items: center;
   padding: 12px 15px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background-color 0.3s ease;
+  user-select: none;
 }
 
 .scrap-accordion-header:hover {
-  background-color: rgba(212, 175, 55, 0.05);
-  border-color: var(--accent-gold);
-}
-
-.scrap-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.scrap-karat {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.scrap-percentage {
-  font-size: 12px;
-  color: var(--text-secondary);
-}
-
-.scrap-max-offer {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--accent-gold);
-  text-align: right;
+  background-color: var(--secondary-bg);
 }
 
 .accordion-toggle {
   font-size: 20px;
-  color: var(--accent-gold);
   font-weight: 700;
-  width: 30px;
+  color: var(--accent-gold);
+  width: 24px;
   text-align: center;
 }
 
 .scrap-accordion-content {
-  background-color: var(--secondary-bg);
-  border-top: 1px solid var(--border-color);
   padding: 15px;
-  animation: slideDown 0.3s ease;
+  border-top: 1px solid var(--border-color);
+  background-color: var(--secondary-bg);
 }
 
-.max-offer-helper {
-  font-size: 11px;
-  color: var(--text-muted);
-  margin-top: 4px;
+.scrap-accordion-content .input-group {
+  margin-bottom: 12px;
 }
 
-.scrap-results {
-  background-color: var(--tertiary-bg);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 12px;
+.scrap-accordion-content .input-group:last-of-type {
+  margin-bottom: 15px;
+}
+
+.scrap-accordion-content .scrap-results {
+  margin-top: 15px;
+  padding-top: 15px;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Logo Section */
+.logo-section {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 12px;
+  gap: 2px;
 }
 
-.total-offer-highlight {
-  background-color: rgba(212, 175, 55, 0.1);
-  padding: 10px;
-  border-radius: 4px;
-  border: 1px solid var(--accent-gold);
-  border-bottom: 1px solid var(--accent-gold) !important;
-  margin-top: 5px;
-}
-
-.total-offer-value {
-  font-size: 16px;
-  color: var(--accent-gold);
-}
-
-.profit-loss {
-  background-color: rgba(0, 0, 0, 0.3);
-  padding: 10px;
-  border-radius: 4px;
-  border: 1px solid var(--border-color);
-  border-bottom: 1px solid var(--border-color) !important;
-}
-
-.profit-loss.profit {
-  border-color: #00ff00;
-  background-color: rgba(0, 255, 0, 0.1);
-}
-
-.profit-loss.profit .result-value {
-  color: #00ff00;
-}
-
-.profit-loss.loss {
-  border-color: #ff0000;
-  background-color: rgba(255, 0, 0, 0.1);
-}
-
-.profit-loss.loss .result-value {
-  color: #ff0000;
-}
-
-/* Responsive Design */
+/* Responsive */
 @media (max-width: 768px) {
-  .container {
-    padding: 15px;
-  }
-
-  .section {
-    padding: 15px;
-    margin-bottom: 15px;
-  }
-
-  .section h2 {
-    font-size: 18px;
-  }
-
-  .spot-price-value {
-    font-size: 36px;
-  }
-
-  .bar-prices-list {
-    grid-template-columns: 1fr;
-  }
-
-  .chart-controls {
-    gap: 8px;
-  }
-
-  .chart-btn {
-    padding: 6px 12px;
-    font-size: 11px;
-  }
-
-  .prediction-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .scrap-price-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .calc-inputs {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 480px) {
-  .header {
-    padding: 15px;
-  }
-
-  .logo {
-    font-size: 24px;
-  }
-
-  .spot-price-value {
-    font-size: 28px;
-  }
-
-  .section h2 {
-    font-size: 16px;
+  .spot-price-header {
+    flex-direction: column;
+    align-items: flex-start;
   }
 
   .unit-toggle-inline {
-    flex-direction: column;
     width: 100%;
+    justify-content: flex-start;
   }
 
-  .unit-toggle-inline button {
-    width: 100%;
+  .scrap-accordion-header {
+    grid-template-columns: 1fr auto;
+    gap: 10px;
   }
 
-  .chart-controls {
-    flex-direction: column;
+  .scrap-max-offer {
+    order: -1;
+    grid-column: 2;
+    grid-row: 1;
   }
 
-  .chart-btn {
-    width: 100%;
+  .accordion-toggle {
+    grid-column: 2;
+    grid-row: 2;
+  }
+
+  .section-header-with-icon {
+    flex-wrap: wrap;
+  }
+
+  .section-icon {
+    width: 28px;
+    height: 28px;
   }
 }
