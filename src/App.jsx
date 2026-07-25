@@ -104,48 +104,53 @@ export default function App() {
     }
   };
 
-  // Generate historical chart data
+  // Generate historical chart data with realistic price variations
   const generateChartData = (period) => {
     if (!spotPrice) return [];
     
     const currentPrice = spotPrice.gram;
+    const baselinePrice = currentPrice * 0.98;
     const data = [];
-    let points = 30;
-    let dateFormat = 'MMM DD';
     
     const periodConfig = {
-      '24h': { points: 24, label: 'HH:mm', volatility: 0.5 },
-      '30d': { points: 30, label: 'MMM DD', volatility: 1.2 },
-      '3m': { points: 13, label: 'MMM DD', volatility: 1.5 },
-      '6m': { points: 26, label: 'MMM DD', volatility: 1.8 },
-      '12m': { points: 52, label: 'MMM DD', volatility: 2.0 },
-      '5y': { points: 60, label: 'MMM YY', volatility: 2.5 },
-      '10y': { points: 120, label: 'MMM YY', volatility: 3.0 }
+      '24h': { points: 24, label: 'HH:mm', volatility: 2.0, daysPerPoint: 0 },
+      '7d': { points: 7, label: 'MMM DD', volatility: 3.0, daysPerPoint: 1 },
+      '30d': { points: 30, label: 'MMM DD', volatility: 3.5, daysPerPoint: 1 },
+      '1y': { points: 52, label: 'MMM DD', volatility: 4.0, daysPerPoint: 7 },
+      '5y': { points: 60, label: 'MMM YY', volatility: 4.5, daysPerPoint: 30 }
     };
     
-    const config = periodConfig[period] || periodConfig['12m'];
+    const config = periodConfig[period] || periodConfig['1y'];
+    
+    // Generate realistic trend: start with a direction, add noise
+    const trendDirection = Math.random() > 0.5 ? 1 : -1;
+    let trendValue = -2;
     
     for (let i = 0; i < config.points; i++) {
-      const randomChange = (Math.random() - 0.5) * config.volatility;
-      const price = currentPrice * (1 + randomChange / 100);
+      // Create smooth trend component
+      trendValue += (Math.random() - 0.4) * 0.6 * trendDirection;
+      trendValue = Math.max(-4, Math.min(4, trendValue));
       
+      // Add volatility on top of trend for realistic fluctuations
+      const volatilityComponent = (Math.random() - 0.5) * config.volatility;
+      const priceChange = trendValue + volatilityComponent;
+      const price = baselinePrice * (1 + priceChange / 100);
+      
+      // Calculate date
       const date = new Date();
       if (period === '24h') {
         date.setHours(date.getHours() - (config.points - i));
+      } else if (period === '7d') {
+        date.setDate(date.getDate() - (config.points - i));
       } else if (period === '30d') {
         date.setDate(date.getDate() - (config.points - i));
-      } else if (period === '3m') {
-        date.setDate(date.getDate() - (config.points - i) * 7);
-      } else if (period === '6m') {
-        date.setDate(date.getDate() - (config.points - i) * 7);
-      } else if (period === '12m') {
+      } else if (period === '1y') {
         date.setDate(date.getDate() - (config.points - i) * 7);
       } else if (period === '5y') {
         date.setMonth(date.getMonth() - (config.points - i));
-      } else if (period === '10y') {
-        date.setMonth(date.getMonth() - (config.points - i));
       }
       
+      // Format date label
       let dateStr = '';
       if (config.label === 'HH:mm') {
         dateStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
@@ -155,7 +160,7 @@ export default function App() {
         dateStr = date.toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
       }
       
-      data.push({ date: dateStr, price: Math.max(price, 50) });
+      data.push({ date: dateStr, price: Math.max(price, baselinePrice * 0.95) });
     }
     
     return data;
