@@ -448,11 +448,12 @@ export default function App() {
                   {chartData.map((point, idx) => {
                     const maxPrice = Math.max(...chartData.map(p => p.price));
                     const minPrice = Math.min(...chartData.map(p => p.price));
-                    const range = maxPrice - minPrice || 1;
-                    const height = ((point.price - minPrice) / range) * 100;
+                    const range = maxPrice - minPrice;
+                    const normalizedHeight = range > 0 ? ((point.price - minPrice) / range) * 95 + 5 : 50;
+                    const height = Math.max(5, Math.min(100, normalizedHeight));
                     return (
                       <div key={idx} className="chart-bar-wrapper">
-                        <div className="chart-bar" style={{ height: `${height}%` }}></div>
+                        <div className="chart-bar" style={{ height: `${height}%` }} title={`£${point.price.toFixed(2)}`}></div>
                         <div className="chart-label-small">{point.date}</div>
                       </div>
                     );
