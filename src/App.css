@@ -1227,6 +1227,12 @@ body {
   background-color: var(--secondary-bg);
 }
 
+.bar-price-item.expanded .bar-price-row {
+  border: 2px solid var(--accent-gold);
+  box-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
+  background-color: var(--secondary-bg);
+}
+
 .bar-expansion {
   padding: 15px;
   border-top: 1px solid var(--border-color);
@@ -1261,6 +1267,12 @@ body {
 }
 
 .scrap-price-row:hover {
+  background-color: var(--secondary-bg);
+}
+
+.scrap-price-item.expanded .scrap-price-row {
+  border: 2px solid var(--accent-gold);
+  box-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
   background-color: var(--secondary-bg);
 }
 

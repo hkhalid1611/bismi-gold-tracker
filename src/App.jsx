@@ -261,7 +261,7 @@ export default function App() {
               const barCalc = calculateBarPrice(item.weight);
               
               return (
-                <div key={idx} className="bar-price-item">
+                <div key={idx} className={`bar-price-item ${isExpanded ? 'expanded' : ''}`}>
                   <div 
                     className="bar-price-row"
                     onClick={() => setExpandedBarWeight(isExpanded ? null : item.weight)}
@@ -334,7 +334,7 @@ export default function App() {
               const scrapCalc = calculateScrapOfferForKarat(karat);
               
               return (
-                <div key={karat} className="scrap-price-item">
+                <div key={karat} className={`scrap-price-item ${isExpanded ? 'expanded' : ''}`}>
                   <div 
                     className="scrap-price-row"
                     onClick={() => setExpandedScrapKarat(isExpanded ? null : karat)}
