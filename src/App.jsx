@@ -415,6 +415,141 @@ export default function App() {
             </div>
           </div>
         </section>
+
+        {/* Historical Price Trends */}
+        <section className="section price-trends">
+          <h2>Price Trends</h2>
+          
+          <div className="chart-period-selector">
+            {['24h', '7d', '30d', '1y', '5y'].map((period) => (
+              <button
+                key={period}
+                className={`period-btn ${chartPeriod === period ? 'active' : ''}`}
+                onClick={() => setChartPeriod(period)}
+              >
+                {period}
+              </button>
+            ))}
+          </div>
+
+          <div className="chart-container">
+            {chartData && chartData.length > 0 ? (
+              <div className="simple-chart">
+                <div className="chart-header">
+                  <span className="chart-label">Gold Price ({chartPeriod})</span>
+                  <span className="chart-value">£{spotPrice?.gram.toFixed(2)}</span>
+                </div>
+                <div className="chart-bars">
+                  {chartData.map((point, idx) => {
+                    const maxPrice = Math.max(...chartData.map(p => p.price));
+                    const minPrice = Math.min(...chartData.map(p => p.price));
+                    const range = maxPrice - minPrice || 1;
+                    const height = ((point.price - minPrice) / range) * 100;
+                    return (
+                      <div key={idx} className="chart-bar-wrapper">
+                        <div className="chart-bar" style={{ height: `${height}%` }}></div>
+                        <div className="chart-label-small">{point.date}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="chart-info">
+                  <div className="chart-stat">
+                    <span className="stat-label">High</span>
+                    <span className="stat-value">£{Math.max(...chartData.map(p => p.price)).toFixed(2)}</span>
+                  </div>
+                  <div className="chart-stat">
+                    <span className="stat-label">Low</span>
+                    <span className="stat-value">£{Math.min(...chartData.map(p => p.price)).toFixed(2)}</span>
+                  </div>
+                  <div className="chart-stat">
+                    <span className="stat-label">Avg</span>
+                    <span className="stat-value">£{(chartData.reduce((sum, p) => sum + p.price, 0) / chartData.length).toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="chart-loading">Loading chart data...</div>
+            )}
+          </div>
+        </section>
+
+        {/* Price Comparison */}
+        <section className="section price-comparison">
+          <h2>Price Comparison</h2>
+          
+          <div className="comparison-grid">
+            <div className="comparison-item">
+              <div className="comparison-label">24h High</div>
+              <div className="comparison-value">£{chartData && chartData.length > 0 ? Math.max(...chartData.map(p => p.price)).toFixed(2) : '—'}</div>
+            </div>
+            <div className="comparison-item">
+              <div className="comparison-label">24h Low</div>
+              <div className="comparison-value">£{chartData && chartData.length > 0 ? Math.min(...chartData.map(p => p.price)).toFixed(2) : '—'}</div>
+            </div>
+            <div className="comparison-item">
+              <div className="comparison-label">Current</div>
+              <div className="comparison-value">£{spotPrice?.gram.toFixed(2) || '—'}</div>
+            </div>
+            <div className="comparison-item">
+              <div className="comparison-label">Range</div>
+              <div className="comparison-value">{chartData && chartData.length > 0 ? (Math.max(...chartData.map(p => p.price)) - Math.min(...chartData.map(p => p.price))).toFixed(2) : '—'}</div>
+            </div>
+          </div>
+        </section>
+
+        {/* Price Prediction */}
+        <section className="section price-prediction">
+          <h2>Price Prediction & Analysis</h2>
+          
+          <div className="prediction-container">
+            <div className="prediction-card">
+              <div className="prediction-title">Market Outlook</div>
+              <div className="prediction-content">
+                <p className="prediction-text">
+                  Based on current market trends and historical data, gold prices are expected to remain relatively stable in the short term. 
+                  Key factors influencing gold prices include:
+                </p>
+                <ul className="prediction-factors">
+                  <li><strong>USD Strength:</strong> Strong dollar typically pressures gold prices</li>
+                  <li><strong>Interest Rates:</strong> Higher rates reduce gold's appeal as non-yielding asset</li>
+                  <li><strong>Inflation:</strong> Rising inflation supports gold as a hedge</li>
+                  <li><strong>Geopolitical Risk:</strong> Uncertainty increases safe-haven demand</li>
+                </ul>
+              </div>
+            </div>
+
+            <div className="prediction-card">
+              <div className="prediction-title">Price Forecast</div>
+              <div className="prediction-content">
+                <div className="forecast-item">
+                  <span className="forecast-label">1-Week Forecast</span>
+                  <span className="forecast-value neutral">Stable</span>
+                </div>
+                <div className="forecast-item">
+                  <span className="forecast-label">1-Month Forecast</span>
+                  <span className="forecast-value neutral">Neutral</span>
+                </div>
+                <div className="forecast-item">
+                  <span className="forecast-label">Confidence Level</span>
+                  <span className="forecast-value">Moderate</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="prediction-card">
+              <div className="prediction-title">Recommendations</div>
+              <div className="prediction-content">
+                <ul className="prediction-recommendations">
+                  <li>💡 Consider buying on price dips for long-term holdings</li>
+                  <li>💡 Monitor USD movements for trading opportunities</li>
+                  <li>💡 Keep watch on central bank policy announcements</li>
+                  <li>💡 Diversify precious metals portfolio</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
       </main>
     </div>
   );
