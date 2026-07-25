@@ -51,8 +51,9 @@ export default function App() {
   });
   
   // Chart states
-  const [chartPeriod, setChartPeriod] = useState('12m');
+  const [chartPeriod, setChartPeriod] = useState('24h');
   const [chartData, setChartData] = useState(null);
+  const [selectedBarIndex, setSelectedBarIndex] = useState(null);
 
   // Carat percentages of spot price
   const caratPercentages = {
@@ -444,21 +445,56 @@ export default function App() {
                   <span className="chart-label">Gold Price ({chartPeriod})</span>
                   <span className="chart-value">£{spotPrice?.gram.toFixed(2)}</span>
                 </div>
-                <div className="chart-bars">
-                  {chartData.map((point, idx) => {
-                    const maxPrice = Math.max(...chartData.map(p => p.price));
-                    const minPrice = Math.min(...chartData.map(p => p.price));
-                    const range = maxPrice - minPrice;
-                    const normalizedHeight = range > 0 ? ((point.price - minPrice) / range) * 95 + 5 : 50;
-                    const height = Math.max(5, Math.min(100, normalizedHeight));
-                    return (
-                      <div key={idx} className="chart-bar-wrapper">
-                        <div className="chart-bar" style={{ height: `${height}%` }} title={`£${point.price.toFixed(2)}`}></div>
-                        <div className="chart-label-small">{point.date}</div>
-                      </div>
-                    );
-                  })}
+                
+                <div className="chart-wrapper">
+                  <div className="chart-y-axis">
+                    {(() => {
+                      const maxPrice = Math.max(...chartData.map(p => p.price));
+                      const minPrice = Math.min(...chartData.map(p => p.price));
+                      const yLabels = [];
+                      for (let i = 0; i <= 4; i++) {
+                        const price = minPrice + (maxPrice - minPrice) * (i / 4);
+                        yLabels.push(
+                          <div key={i} className="y-axis-label">
+                            £{price.toFixed(2)}
+                          </div>
+                        );
+                      }
+                      return yLabels;
+                    })()}
+                  </div>
+                  
+                  <div className="chart-bars-container">
+                    <div className="chart-bars">
+                      {chartData.map((point, idx) => {
+                        const maxPrice = Math.max(...chartData.map(p => p.price));
+                        const minPrice = Math.min(...chartData.map(p => p.price));
+                        const range = maxPrice - minPrice || 1;
+                        const height = ((point.price - minPrice) / range) * 100;
+                        const isSelected = selectedBarIndex === idx;
+                        
+                        return (
+                          <div key={idx} className="chart-bar-wrapper">
+                            <div 
+                              className={`chart-bar ${isSelected ? 'selected' : ''}`}
+                              style={{ height: `${height}%` }}
+                              onClick={() => setSelectedBarIndex(isSelected ? null : idx)}
+                            >
+                              {isSelected && (
+                                <div className="bar-tooltip">
+                                  <div className="tooltip-label">High</div>
+                                  <div className="tooltip-value">£{point.price.toFixed(2)}</div>
+                                </div>
+                              )}
+                            </div>
+                            <div className="chart-label-small">{point.date}</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
+                
                 <div className="chart-info">
                   <div className="chart-stat">
                     <span className="stat-label">High</span>
