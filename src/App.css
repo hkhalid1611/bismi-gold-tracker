@@ -780,23 +780,17 @@ body {
   border-color: var(--accent-gold);
 }
 
-/* Scrap Price Accordion */
-.scrap-price-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.scrap-accordion-item {
+/* Bar Price Item with Expansion */
+.bar-price-item {
   background-color: var(--tertiary-bg);
   border: 1px solid var(--border-color);
   border-radius: 6px;
   overflow: hidden;
 }
 
-.scrap-accordion-header {
+.bar-price-row {
   display: grid;
-  grid-template-columns: 1fr auto auto;
+  grid-template-columns: 1fr auto;
   gap: 15px;
   align-items: center;
   padding: 12px 15px;
@@ -805,36 +799,68 @@ body {
   user-select: none;
 }
 
-.scrap-accordion-header:hover {
+.bar-price-row:hover {
   background-color: var(--secondary-bg);
 }
 
-.accordion-toggle {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--accent-gold);
-  width: 24px;
-  text-align: center;
-}
-
-.scrap-accordion-content {
+.bar-expansion {
   padding: 15px;
   border-top: 1px solid var(--border-color);
   background-color: var(--secondary-bg);
 }
 
-.scrap-accordion-content .input-group {
-  margin-bottom: 12px;
-}
-
-.scrap-accordion-content .input-group:last-of-type {
+.bar-expansion .calc-inputs {
   margin-bottom: 15px;
 }
 
-.scrap-accordion-content .scrap-results {
-  margin-top: 15px;
-  padding-top: 15px;
+.bar-expansion .calc-results {
+  margin-top: 0;
+}
+
+/* Scrap Price Item with Expansion */
+.scrap-price-item {
+  background-color: var(--tertiary-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.scrap-price-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 15px;
+  align-items: center;
+  padding: 12px 15px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  user-select: none;
+}
+
+.scrap-price-row:hover {
+  background-color: var(--secondary-bg);
+}
+
+.scrap-expansion {
+  padding: 15px;
   border-top: 1px solid var(--border-color);
+  background-color: var(--secondary-bg);
+}
+
+.scrap-expansion .calc-inputs {
+  margin-bottom: 15px;
+}
+
+.scrap-expansion .scrap-results {
+  margin-top: 0;
+}
+
+/* Indicator Card */
+.indicator-card {
+  background-color: var(--tertiary-bg);
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  text-align: center;
 }
 
 /* Logo Section */

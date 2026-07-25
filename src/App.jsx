@@ -21,14 +21,34 @@ export default function App() {
     100: 5.72
   };
 
-  // Price Calculator states
-  const [calcWeight, setCalcWeight] = useState(100);
-  const [calcAdjustment, setCalcAdjustment] = useState(5.72);
-  
-  // Scrap Gold Offer Calculator states
-  const [scrapKarat, setScrapKarat] = useState('22');
-  const [scrapGrams, setScrapGrams] = useState(10);
-  const [scrapOfferPerGram, setScrapOfferPerGram] = useState(0);
+  // Expanded bar weight state (only one can be open at a time)
+  const [expandedBarWeight, setExpandedBarWeight] = useState(null);
+  const [barAdjustments, setBarAdjustments] = useState({
+    100: 5.72,
+    50: 5.99,
+    31.1035: 6.10,
+    20: 7.17,
+    10: 9.04,
+    5: 13.84,
+    2.5: 17.82
+  });
+
+  // Expanded scrap karat state (only one can be open at a time)
+  const [expandedScrapKarat, setExpandedScrapKarat] = useState(null);
+  const [scrapGramsMap, setScrapGramsMap] = useState({
+    '22': 10,
+    '21': 10,
+    '18': 10,
+    '14': 10,
+    '9': 10
+  });
+  const [scrapOfferPerGramMap, setScrapOfferPerGramMap] = useState({
+    '22': 0,
+    '21': 0,
+    '18': 0,
+    '14': 0,
+    '9': 0
+  });
   
   // Chart states
   const [chartPeriod, setChartPeriod] = useState('12m');
@@ -141,12 +161,6 @@ export default function App() {
     return data;
   };
 
-  // Auto-update adjustment percentage when weight changes
-  useEffect(() => {
-    const newAdjustment = barMarkups[calcWeight] || 5.72;
-    setCalcAdjustment(newAdjustment);
-  }, [calcWeight]);
-
   useEffect(() => {
     fetchGoldPrice();
     const interval = setInterval(fetchGoldPrice, 60000);
@@ -160,34 +174,34 @@ export default function App() {
     }
   }, [spotPrice, chartPeriod]);
 
-  // Calculate price calculator results
-  const calculatePriceCalc = () => {
+  // Calculate price for bar expansion
+  const calculateBarPrice = (weight) => {
     if (!spotPrice) return null;
     const spotPriceValue = priceUnit === 'gram' ? spotPrice.gram : spotPrice.ounce;
-    const weight = calcWeight === 31.1035 ? 1 : calcWeight;
-    const basePrice = spotPriceValue * weight;
-    const adjustmentAmount = basePrice * (calcAdjustment / 100);
+    const weightValue = weight === 31.1035 ? 1 : weight;
+    const adjustment = barAdjustments[weight] || 5.72;
+    const basePrice = spotPriceValue * weightValue;
+    const adjustmentAmount = basePrice * (adjustment / 100);
     const totalPrice = basePrice + adjustmentAmount;
-    const calcAdjustment_val = parseFloat(calcAdjustment) || 0;
     
     return {
       spotPrice: spotPriceValue,
-      weight,
+      weight: weightValue,
       basePrice,
-      adjustment: calcAdjustment_val,
+      adjustment,
       adjustmentAmount,
       totalPrice
     };
   };
 
-  // Calculate scrap offer results
-  const calculateScrapOffer = () => {
+  // Calculate scrap offer for karat expansion
+  const calculateScrapOfferForKarat = (karat) => {
     if (!spotPrice) return null;
-    const maxOfferPerGram = spotPrice.gram * (caratPercentages[scrapKarat] / 100);
-    const totalOfferPrice = scrapGrams * scrapOfferPerGram;
-    const maxTotalPrice = scrapGrams * maxOfferPerGram;
-    // Profit if offer is LESS than max (you're offering less than allowed)
-    // Loss if offer is MORE than max (you're overpaying)
+    const maxOfferPerGram = spotPrice.gram * (caratPercentages[karat] / 100);
+    const grams = scrapGramsMap[karat] || 10;
+    const offerPerGram = scrapOfferPerGramMap[karat] || 0;
+    const totalOfferPrice = grams * offerPerGram;
+    const maxTotalPrice = grams * maxOfferPerGram;
     const profit = maxTotalPrice - totalOfferPrice;
     
     return {
@@ -195,12 +209,11 @@ export default function App() {
       totalOfferPrice,
       maxTotalPrice,
       profit,
-      isProfit: profit >= 0
+      isProfit: profit >= 0,
+      grams,
+      offerPerGram
     };
   };
-
-  const priceCalc = calculatePriceCalc();
-  const scrapOffer = calculateScrapOffer();
 
   return (
     <div className="app">
@@ -229,7 +242,7 @@ export default function App() {
           {lastUpdate && <div className="update-time">Updated: {lastUpdate}</div>}
         </section>
 
-        {/* Gold Bar Prices */}
+        {/* Gold Bar Prices with Expandable Calculator */}
         <section className="section gold-bar-prices">
           <h2>Gold Bar Prices</h2>
           
@@ -244,77 +257,68 @@ export default function App() {
               { weight: 2.5, markup: barMarkups[2.5] }
             ].map((item, idx) => {
               const price = spotPrice.gram * item.weight * (1 + item.markup / 100);
+              const isExpanded = expandedBarWeight === item.weight;
+              const barCalc = calculateBarPrice(item.weight);
+              
               return (
-                <div key={idx} className="bar-price-row">
-                  <span className="weight-label">{item.label || `${item.weight}g`}</span>
-                  <span className="bar-price">£{price.toFixed(2)}</span>
+                <div key={idx} className="bar-price-item">
+                  <div 
+                    className="bar-price-row"
+                    onClick={() => setExpandedBarWeight(isExpanded ? null : item.weight)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <span className="weight-label">{item.label || `${item.weight}g`}</span>
+                    <span className="bar-price">£{price.toFixed(2)}</span>
+                  </div>
+                  
+                  {isExpanded && barCalc && (
+                    <div className="bar-expansion">
+                      <div className="calc-inputs">
+                        <div className="input-group">
+                          <label>Adjustment %</label>
+                          <input 
+                            type="number" 
+                            value={barAdjustments[item.weight]} 
+                            onChange={(e) => setBarAdjustments({
+                              ...barAdjustments,
+                              [item.weight]: parseFloat(e.target.value)
+                            })}
+                            placeholder="Enter adjustment percentage"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="calc-results">
+                        <div className="result-row">
+                          <span className="result-label">Spot Price per gram</span>
+                          <span className="result-value">£{barCalc.spotPrice.toFixed(2)}</span>
+                        </div>
+                        <div className="result-row">
+                          <span className="result-label">Weight</span>
+                          <span className="result-value">{item.label || `${item.weight}g`}</span>
+                        </div>
+                        <div className="result-row">
+                          <span className="result-label">Base Price</span>
+                          <span className="result-value">£{barCalc.basePrice.toFixed(2)}</span>
+                        </div>
+                        <div className="result-row">
+                          <span className="result-label">Adjustment ({barCalc.adjustment}%)</span>
+                          <span className="result-value">£{barCalc.adjustmentAmount.toFixed(2)}</span>
+                        </div>
+                        <div className="result-row total-price-highlight">
+                          <span className="result-label">Total Price</span>
+                          <span className="result-value total-price-value">£{barCalc.totalPrice.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}
           </div>
         </section>
 
-        {/* Price Calculator */}
-        <section className="section price-calculator">
-          <h2>Price Calculator</h2>
-          
-          <div className="calc-inputs">
-            <div className="input-group">
-              <label>Weight</label>
-              <select value={calcWeight} onChange={(e) => {
-                const weight = parseFloat(e.target.value);
-                setCalcWeight(weight);
-                // Auto-update adjustment to match the bar markup
-                const newAdjustment = barMarkups[weight] || 5.72;
-                setCalcAdjustment(newAdjustment);
-              }}>
-                <option value={100}>100 gram</option>
-                <option value={50}>50 gram</option>
-                <option value={31.1035}>1 ounce</option>
-                <option value={20}>20 gram</option>
-                <option value={10}>10 gram</option>
-                <option value={5}>5 gram</option>
-                <option value={2.5}>2.5 gram</option>
-              </select>
-            </div>
-            <div className="input-group">
-              <label>Adjustment %</label>
-              <input 
-                type="number" 
-                value={calcAdjustment} 
-                onChange={(e) => setCalcAdjustment(parseFloat(e.target.value))}
-                placeholder="Enter adjustment percentage"
-              />
-            </div>
-          </div>
-
-          {priceCalc && (
-            <div className="calc-results">
-              <div className="result-row">
-                <span className="result-label">Spot Price per gram</span>
-                <span className="result-value">£{priceCalc.spotPrice.toFixed(2)}</span>
-              </div>
-              <div className="result-row">
-                <span className="result-label">Weight</span>
-                <span className="result-value">{calcWeight}g</span>
-              </div>
-              <div className="result-row">
-                <span className="result-label">Base Price</span>
-                <span className="result-value">£{priceCalc.basePrice.toFixed(2)}</span>
-              </div>
-              <div className="result-row">
-                <span className="result-label">Adjustment ({priceCalc.adjustment}%)</span>
-                <span className="result-value">£{priceCalc.adjustmentAmount.toFixed(2)}</span>
-              </div>
-              <div className="result-row total-price-highlight">
-                <span className="result-label">Total Price</span>
-                <span className="result-value total-price-value">£{priceCalc.totalPrice.toFixed(2)}</span>
-              </div>
-            </div>
-          )}
-        </section>
-
-        {/* Scrap Price */}
+        {/* Scrap Price with Expandable Calculator */}
         <section className="section scrap-price">
           <h2>Scrap Price</h2>
           
@@ -326,257 +330,92 @@ export default function App() {
           <div className="scrap-price-grid">
             {Object.entries(caratPercentages).map(([karat, percentage]) => {
               const maxOffer = spotPrice ? spotPrice.gram * (percentage / 100) : 0;
+              const isExpanded = expandedScrapKarat === karat;
+              const scrapCalc = calculateScrapOfferForKarat(karat);
+              
               return (
-                <div key={karat} className="scrap-price-row">
-                  <div className="scrap-info">
-                    <div className="scrap-karat">{karat} Carat</div>
-                    <div className="scrap-percentage">{percentage}% of spot</div>
+                <div key={karat} className="scrap-price-item">
+                  <div 
+                    className="scrap-price-row"
+                    onClick={() => setExpandedScrapKarat(isExpanded ? null : karat)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    <div className="scrap-info">
+                      <div className="scrap-karat">{karat} Carat</div>
+                      <div className="scrap-percentage">{percentage}% of spot</div>
+                    </div>
+                    <div className="scrap-max-offer">£{maxOffer.toFixed(2)}/g</div>
                   </div>
-                  <div className="scrap-max-offer">£{maxOffer.toFixed(2)}/g</div>
+
+                  {isExpanded && scrapCalc && (
+                    <div className="scrap-expansion">
+                      <div className="calc-inputs">
+                        <div className="input-group">
+                          <label>Grams</label>
+                          <input 
+                            type="number" 
+                            value={scrapGramsMap[karat]} 
+                            onChange={(e) => setScrapGramsMap({
+                              ...scrapGramsMap,
+                              [karat]: parseFloat(e.target.value)
+                            })}
+                            placeholder="Enter grams"
+                          />
+                        </div>
+                        <div className="input-group">
+                          <label>Offer per gram (£)</label>
+                          <input 
+                            type="number" 
+                            value={scrapOfferPerGramMap[karat]} 
+                            onChange={(e) => setScrapOfferPerGramMap({
+                              ...scrapOfferPerGramMap,
+                              [karat]: parseFloat(e.target.value)
+                            })}
+                            placeholder="Enter offer"
+                          />
+                          <div className="max-offer-helper">Max: £{scrapCalc.maxOfferPerGram.toFixed(2)}</div>
+                        </div>
+                      </div>
+
+                      <div className="scrap-results">
+                        <div className="result-row">
+                          <span className="result-label">Spot Price per gram</span>
+                          <span className="result-value">£{spotPrice?.gram.toFixed(2)}</span>
+                        </div>
+                        <div className="result-row">
+                          <span className="result-label">Carat ({karat}) - {caratPercentages[karat]}%</span>
+                          <span className="result-value">£{scrapCalc.maxOfferPerGram.toFixed(2)}/g</span>
+                        </div>
+                        <div className="result-row total-offer-highlight">
+                          <span className="result-label">Total Offer Price</span>
+                          <span className="result-value total-offer-value">£{scrapCalc.totalOfferPrice.toFixed(2)}</span>
+                        </div>
+                        <div className={`result-row profit-loss ${scrapCalc.isProfit ? 'profit' : 'loss'}`}>
+                          <span className="result-label">{scrapCalc.isProfit ? 'Total Profit' : 'Total Loss'}</span>
+                          <span className="result-value">£{Math.abs(scrapCalc.profit).toFixed(2)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               );
             })}
           </div>
         </section>
 
-        {/* Scrap Gold Offer Calculator */}
-        <section className="section scrap-offer-calculator">
-          <h2>Scrap Gold Offer Calculator</h2>
-          
-          <div className="calc-inputs">
-            <div className="input-group">
-              <label>Karat</label>
-              <select value={scrapKarat} onChange={(e) => setScrapKarat(e.target.value)}>
-                <option value="22">22 Carat (86%)</option>
-                <option value="21">21 Carat (80%)</option>
-                <option value="18">18 Carat (70%)</option>
-                <option value="14">14 Carat (50%)</option>
-                <option value="9">9 Carat (30%)</option>
-              </select>
-            </div>
-            <div className="input-group">
-              <label>Grams</label>
-              <input 
-                type="number" 
-                value={scrapGrams} 
-                onChange={(e) => setScrapGrams(parseFloat(e.target.value))}
-                placeholder="Enter grams"
-              />
-            </div>
-            <div className="input-group">
-              <label>Offer per gram (£)</label>
-              <input 
-                type="number" 
-                value={scrapOfferPerGram} 
-                onChange={(e) => setScrapOfferPerGram(parseFloat(e.target.value))}
-                placeholder="Enter offer"
-              />
-              {scrapOffer && <div className="max-offer-helper">Max: £{scrapOffer.maxOfferPerGram.toFixed(2)}</div>}
-            </div>
-          </div>
-
-          {scrapOffer && (
-            <div className="scrap-results">
-              <div className="result-row">
-                <span className="result-label">Spot Price per gram</span>
-                <span className="result-value">£{spotPrice?.gram.toFixed(2)}</span>
-              </div>
-              <div className="result-row">
-                <span className="result-label">Carat ({scrapKarat}) - {caratPercentages[scrapKarat]}%</span>
-                <span className="result-value">£{scrapOffer.maxOfferPerGram.toFixed(2)}/g</span>
-              </div>
-              <div className="result-row total-offer-highlight">
-                <span className="result-label">Total Offer Price</span>
-                <span className="result-value total-offer-value">£{scrapOffer.totalOfferPrice.toFixed(2)}</span>
-              </div>
-              <div className={`result-row profit-loss ${scrapOffer.isProfit ? 'profit' : 'loss'}`}>
-                <span className="result-label">{scrapOffer.isProfit ? 'Total Profit' : 'Total Loss'}</span>
-                <span className="result-value">£{Math.abs(scrapOffer.profit).toFixed(2)}</span>
-              </div>
-            </div>
-          )}
-        </section>
-
         {/* Price Change Indicators */}
         <section className="section price-indicators">
           <h2>Price Change Indicators</h2>
           <div className="indicators-grid">
-            <div className="indicator">
+            <div className="indicator-card">
               <div className="indicator-label">24h Change</div>
-              <div className={`indicator-value ${priceChange >= 0 ? 'positive' : 'negative'}`}>
-                {priceChange >= 0 ? '+' : ''}{priceChange.toFixed(2)}%
+              <div className={`indicator-value ${priceChange > 0 ? 'positive' : priceChange < 0 ? 'negative' : 'neutral'}`}>
+                {priceChange > 0 ? '+' : ''}{priceChange.toFixed(2)}%
               </div>
             </div>
-            <div className="indicator">
-              <div className="indicator-label">24h %</div>
-              <div className={`indicator-value ${priceChange >= 0 ? 'positive' : 'negative'}`}>
-                {priceChange >= 0 ? '+' : ''}{priceChange.toFixed(2)}%
-              </div>
-            </div>
-            <div className="indicator">
-              <div className="indicator-label">Volatility</div>
-              <div className="indicator-value">1.23%</div>
-            </div>
-            <div className="indicator">
-              <div className="indicator-label">Year Change</div>
-              <div className="indicator-value positive">+5.43%</div>
-            </div>
           </div>
-        </section>
-
-        {/* Price Volatility Meter */}
-        <section className="section volatility-meter">
-          <h2>Price Volatility Meter</h2>
-          <div className="volatility-display">
-            <div className="volatility-bar">
-              <div className="volatility-fill" style={{width: '40%'}}></div>
-            </div>
-            <div className="volatility-label">Moderate</div>
-          </div>
-        </section>
-
-        {/* Year-over-Year Comparison */}
-        <section className="section year-comparison">
-          <h2>Year-over-Year Comparison</h2>
-          <div className="comparison-grid">
-            <div className="comparison-item">
-              <div className="comparison-label">This Year</div>
-              <div className="comparison-value positive">+5.43%</div>
-            </div>
-            <div className="comparison-item">
-              <div className="comparison-label">Last Year</div>
-              <div className="comparison-value positive">+8.5%</div>
-            </div>
-          </div>
-        </section>
-
-        {/* 30-Day Trend Analysis */}
-        <section className="section trend-analysis">
-          <h2>30-Day Trend Analysis</h2>
-          <div className="trend-grid">
-            <div className="trend-item">
-              <div className="trend-label">30-Day Trend</div>
-              <div className="trend-value positive">+2.15%</div>
-            </div>
-            <div className="trend-item">
-              <div className="trend-label">30-Day High</div>
-              <div className="trend-value">£106.11</div>
-            </div>
-            <div className="trend-item">
-              <div className="trend-label">30-Day Low</div>
-              <div className="trend-value">£96.01</div>
-            </div>
-          </div>
-        </section>
-
-        {/* Price Trends Chart */}
-        <section className="section price-trends">
-          <h2>Price Trends</h2>
-          
-          <div className="chart-period-selector">
-            {['24h', '30d', '3m', '6m', '12m', '5y', '10y'].map(period => (
-              <button 
-                key={period}
-                className={`period-btn ${chartPeriod === period ? 'active' : ''}`}
-                onClick={() => setChartPeriod(period)}
-              >
-                {period === '24h' ? '24 Hours' : period === '30d' ? '30 Days' : period === '3m' ? '3 Months' : period === '6m' ? '6 Months' : period === '12m' ? '12 Months' : period === '5y' ? '5 Years' : '10 Years'}
-              </button>
-            ))}
-          </div>
-
-          {chartData && chartData.length > 0 ? (
-            <div className="chart-container">
-              <div className="chart-display">
-                <svg viewBox="0 0 800 350" className="chart-svg">
-                  {/* Grid lines */}
-                  {[0, 1, 2, 3, 4].map(i => (
-                    <line key={`grid-${i}`} x1="50" y1={50 + i * 50} x2="750" y2={50 + i * 50} stroke="#333" strokeWidth="1" strokeDasharray="5,5" />
-                  ))}
-                  
-                  {/* Chart line */}
-                  {(() => {
-                    const minPrice = Math.min(...chartData.map(d => d.price));
-                    const maxPrice = Math.max(...chartData.map(d => d.price));
-                    const range = maxPrice - minPrice || 1;
-                    const points = chartData.map((d, i) => {
-                      const x = 50 + (i / (chartData.length - 1 || 1)) * 700;
-                      const y = 250 - ((d.price - minPrice) / range) * 200;
-                      return `${x},${y}`;
-                    }).join(' ');
-                    
-                    return (
-                      <>
-                        <polyline points={points} fill="none" stroke="#d4af37" strokeWidth="2" />
-                        {/* Data points */}
-                        {chartData.map((d, i) => {
-                          const x = 50 + (i / (chartData.length - 1 || 1)) * 700;
-                          const y = 250 - ((d.price - minPrice) / range) * 200;
-                          return <circle key={`point-${i}`} cx={x} cy={y} r="3" fill="#d4af37" />;
-                        })}
-                        
-                        {/* Horizontal axis labels (dates) */}
-                        {chartData.map((d, i) => {
-                          if (i % Math.max(1, Math.floor(chartData.length / 6)) === 0 || i === chartData.length - 1) {
-                            const x = 50 + (i / (chartData.length - 1 || 1)) * 700;
-                            return (
-                              <g key={`date-${i}`}>
-                                <line x1={x} y1="250" x2={x} y2="260" stroke="#666" strokeWidth="1" />
-                                <text x={x} y="275" textAnchor="middle" fontSize="11" fill="#999" fontFamily="Arial">{d.date}</text>
-                              </g>
-                            );
-                          }
-                          return null;
-                        })}
-                        
-                        {/* Vertical axis labels (prices) */}
-                        {[0, 1, 2, 3, 4].map(i => {
-                          const price = minPrice + (range / 4) * i;
-                          const y = 250 - (i * 50);
-                          return (
-                            <g key={`price-${i}`}>
-                              <line x1="45" y1={y} x2="50" y2={y} stroke="#666" strokeWidth="1" />
-                              <text x="40" y={y + 4} textAnchor="end" fontSize="11" fill="#999" fontFamily="Arial">£{price.toFixed(0)}</text>
-                            </g>
-                          );
-                        })}
-                      </>
-                    );
-                  })()}
-                  
-                  {/* Axes */}
-                  <line x1="50" y1="250" x2="750" y2="250" stroke="#666" strokeWidth="2" />
-                  <line x1="50" y1="50" x2="50" y2="250" stroke="#666" strokeWidth="2" />
-                </svg>
-                
-                {/* Chart Info */}
-                <div className="chart-info">
-                  <div className="info-item">
-                    <span className="info-label">High:</span>
-                    <span className="info-value">£{Math.max(...chartData.map(d => d.price)).toFixed(2)}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">Low:</span>
-                    <span className="info-value">£{Math.min(...chartData.map(d => d.price)).toFixed(2)}</span>
-                  </div>
-                  <div className="info-item">
-                    <span className="info-label">Average:</span>
-                    <span className="info-value">£{(chartData.reduce((sum, d) => sum + d.price, 0) / chartData.length).toFixed(2)}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="chart-placeholder">
-              <p>Loading chart data...</p>
-            </div>
-          )}
         </section>
       </main>
-
-      <footer className="footer">
-        <p>BISMI Jeweller • Real-time data from gold-api.com • For personal use only</p>
-      </footer>
     </div>
   );
 }
