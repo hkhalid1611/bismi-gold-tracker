@@ -882,6 +882,35 @@ body {
 
 /* Responsive */
 @media (max-width: 768px) {
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    overflow-x: hidden;
+  }
+
+  .app {
+    overflow-x: hidden;
+  }
+
+  .container {
+    padding: 12px;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .section {
+    padding: 12px;
+    margin-bottom: 12px;
+    overflow-x: hidden;
+  }
+
+  .section h2 {
+    font-size: 16px;
+    margin-bottom: 12px;
+  }
+
   .logo {
     font-size: 24px;
   }
@@ -891,42 +920,229 @@ body {
   }
 
   .spot-price-value {
-    font-size: 36px;
+    font-size: 32px;
+  }
+
+  .spot-price-display {
+    padding: 15px;
   }
 
   .total-price-value {
-    font-size: 24px !important;
+    font-size: 20px !important;
   }
 
   .total-offer-value {
-    font-size: 24px !important;
+    font-size: 20px !important;
   }
 
   .calc-inputs {
     grid-template-columns: 1fr;
+    gap: 10px;
   }
 
-  .chart-period-selector {
-    justify-content: center;
+  .input-group {
+    gap: 6px;
   }
 
-  .period-btn {
+  .input-group label {
     font-size: 11px;
-    padding: 6px 12px;
-  }
-
-  .chart-info {
-    grid-template-columns: 1fr;
-  }
-
-  .chart-container {
-    padding: 15px;
-    min-height: 350px;
   }
 
   .input-group select,
   .input-group input {
     font-size: 16px;
+    padding: 8px 10px;
+  }
+
+  .result-row {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .result-label {
+    font-size: 12px;
+  }
+
+  .result-value {
+    font-size: 13px;
+  }
+
+  .total-price-highlight {
+    padding: 14px 12px;
+  }
+
+  .total-price-value {
+    font-size: 18px !important;
+  }
+
+  /* Chart Period Selector */
+  .chart-period-selector {
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .period-btn {
+    font-size: 10px;
+    padding: 6px 10px;
+  }
+
+  /* Chart */
+  .chart-container {
+    padding: 12px;
+    min-height: 300px;
+    overflow-x: hidden;
+  }
+
+  .simple-chart {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  .chart-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 15px;
+  }
+
+  .chart-label {
+    font-size: 12px;
+  }
+
+  .chart-value {
+    font-size: 18px;
+  }
+
+  .chart-bars {
+    height: 150px;
+    gap: 2px;
+    margin-bottom: 15px;
+  }
+
+  .chart-label-small {
+    font-size: 8px;
+  }
+
+  .chart-info {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+
+  .chart-stat {
+    gap: 4px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+  }
+
+  .stat-value {
+    font-size: 14px;
+  }
+
+  /* Comparison Grid */
+  .comparison-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+
+  .comparison-item {
+    padding: 12px;
+  }
+
+  .comparison-label {
+    font-size: 10px;
+  }
+
+  .comparison-value {
+    font-size: 14px;
+  }
+
+  /* Prediction */
+  .prediction-container {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .prediction-card {
+    padding: 12px;
+  }
+
+  .prediction-title {
+    font-size: 12px;
+    margin-bottom: 10px;
+  }
+
+  .prediction-content {
+    font-size: 12px;
+  }
+
+  .prediction-factors li,
+  .prediction-recommendations li {
+    font-size: 11px;
+    padding: 5px 0;
+  }
+
+  .forecast-item {
+    padding: 6px 0;
+  }
+
+  .forecast-label {
+    font-size: 11px;
+  }
+
+  .forecast-value {
+    font-size: 11px;
+  }
+
+  /* Bar/Scrap Prices */
+  .bar-price-row,
+  .scrap-price-row {
+    padding: 10px 12px;
+    gap: 10px;
+  }
+
+  .weight-label,
+  .scrap-karat {
+    font-size: 12px;
+  }
+
+  .bar-price,
+  .scrap-max-offer {
+    font-size: 13px;
+  }
+
+  .bar-expansion,
+  .scrap-expansion {
+    padding: 12px;
+  }
+
+  /* Unit Toggle */
+  .unit-toggle {
+    gap: 8px;
+  }
+
+  .unit-toggle button {
+    padding: 6px 12px;
+    font-size: 11px;
+  }
+
+  /* Indicators */
+  .indicators-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .indicator-card {
+    padding: 10px;
+  }
+
+  .indicator-label {
+    font-size: 10px;
+  }
+
+  .indicator-value {
+    font-size: 14px;
   }
 }
 
