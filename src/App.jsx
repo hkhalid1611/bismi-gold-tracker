@@ -452,7 +452,7 @@ export default function App() {
                       const maxPrice = Math.max(...chartData.map(p => p.price));
                       const minPrice = Math.min(...chartData.map(p => p.price));
                       const yLabels = [];
-                      for (let i = 0; i <= 4; i++) {
+                      for (let i = 4; i >= 0; i--) {
                         const price = minPrice + (maxPrice - minPrice) * (i / 4);
                         yLabels.push(
                           <div key={i} className="y-axis-label">
