@@ -113,11 +113,11 @@ export default function App() {
     const data = [];
     
     const periodConfig = {
-      '24h': { points: 24, label: 'HH:mm', volatility: 2.0, daysPerPoint: 0 },
-      '7d': { points: 7, label: 'MMM DD', volatility: 3.0, daysPerPoint: 1 },
-      '30d': { points: 30, label: 'MMM DD', volatility: 3.5, daysPerPoint: 1 },
-      '1y': { points: 52, label: 'MMM DD', volatility: 4.0, daysPerPoint: 7 },
-      '5y': { points: 60, label: 'MMM YY', volatility: 4.5, daysPerPoint: 30 }
+      '24h': { points: 24, label: 'HH:mm', volatility: 10.0, daysPerPoint: 0 },
+      '7d': { points: 7, label: 'MMM DD', volatility: 15.0, daysPerPoint: 1 },
+      '30d': { points: 30, label: 'MMM DD', volatility: 18.0, daysPerPoint: 1 },
+      '1y': { points: 52, label: 'MMM DD', volatility: 20.0, daysPerPoint: 7 },
+      '5y': { points: 60, label: 'MMM YY', volatility: 25.0, daysPerPoint: 30 }
     };
     
     const config = periodConfig[period] || periodConfig['1y'];
@@ -127,11 +127,11 @@ export default function App() {
     let trendValue = -2;
     
     for (let i = 0; i < config.points; i++) {
-      // Create smooth trend component
-      trendValue += (Math.random() - 0.4) * 0.6 * trendDirection;
-      trendValue = Math.max(-4, Math.min(4, trendValue));
+      // Create smooth trend component with larger swings
+      trendValue += (Math.random() - 0.3) * 2.0 * trendDirection;
+      trendValue = Math.max(-10, Math.min(10, trendValue));
       
-      // Add volatility on top of trend for realistic fluctuations
+      // Add volatility on top of trend for dramatic fluctuations
       const volatilityComponent = (Math.random() - 0.5) * config.volatility;
       const priceChange = trendValue + volatilityComponent;
       const price = baselinePrice * (1 + priceChange / 100);
